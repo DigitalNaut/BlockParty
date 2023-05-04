@@ -14,6 +14,7 @@ public class BallManager : MonoBehaviour
   public float VolleyOffsetDistance = 0.5f;
   BallProjectile lucidBall = null;
   Coroutine dispenseRoutine;
+  Coroutine paddleTrackRoutine;
   AudioSource audioSource;
 
   public BallProjectile MainBall { get; private set; } = null;
@@ -60,12 +61,9 @@ public class BallManager : MonoBehaviour
   {
     StartCoroutine(Dispense(0f));
 
-    if (MainBallPrefab == null)
-      Debug.LogError("Main ball not set.", transform);
-    if (GetLucidBall(out _) == null)
-      Debug.LogError("Lucid ball not set.", transform);
-    if (BallSwapSound == null)
-      Debug.LogError("Ball swap sound not set.", transform);
+    Debug.Assert(MainBallPrefab != null, "Main ball not set.", transform);
+    Debug.Assert(GetLucidBall(out _) != null, "Lucid ball not set.", transform);
+    Debug.Assert(BallSwapSound != null, "Ball swap sound not set.", transform);
 
     audioSource = GetComponent<AudioSource>();
   }
@@ -77,9 +75,15 @@ public class BallManager : MonoBehaviour
 
     if (keyboard.spaceKey.wasPressedThisFrame)
     {
-      Debug.Log("Dispense Cr: " + dispenseRoutine);
       if (!MainBall.isActiveAndEnabled && dispenseRoutine == null)
-        dispenseRoutine = StartCoroutine(Dispense(0.5f));
+      {
+        Debug.Log("Dispensing ball");
+        dispenseRoutine = StartCoroutine(Dispense(0.15f));
+      }
+      else if (MainBall.isActiveAndEnabled)
+        Debug.Log("Ball already active");
+      else
+        Debug.Log("Dispense already in progress");
     }
   }
 
@@ -98,6 +102,8 @@ public class BallManager : MonoBehaviour
       }
       else yield return new WaitForFixedUpdate();
     }
+
+    paddleTrackRoutine = null;
   }
 
   void Volley(Vector3 vector)
@@ -115,10 +121,7 @@ public class BallManager : MonoBehaviour
   IEnumerator Dispense(float waitTime)
   {
     if (MainBallPrefab == null)
-    {
-      Debug.LogError("Volley object not set.", transform);
-      yield return null;
-    }
+      throw new Exception("Main ball prefab not set.");
 
     yield return new WaitForSeconds(waitTime);
 
@@ -131,7 +134,9 @@ public class BallManager : MonoBehaviour
     MainBall.GetComponent<Collider>().enabled = false;
     MainBall.gameObject.SetActive(true);
 
-    StartCoroutine(PaddleTrackBall());
+    paddleTrackRoutine = StartCoroutine(PaddleTrackBall());
+
+    dispenseRoutine = null;
   }
 
   void OnDisable() => StopAllCoroutines();
@@ -152,6 +157,7 @@ public class BallManager : MonoBehaviour
 public class CollisionTracker : MonoBehaviour
 {
   public Action<Collider> CollisionAction;
+
   void OnCollisionEnter(Collision collision)
   {
     CollisionAction?.Invoke(collision.collider);

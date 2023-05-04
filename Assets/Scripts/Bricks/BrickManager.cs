@@ -1,31 +1,29 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class BrickManager : MonoBehaviour
 {
   [SerializeField]
-  TextMeshProUGUI textbox;
+  TextMeshProUGUI bricksCountTextbox;
   List<Breakable> breakables;
-  UnityEvent destroyEvent;
+
+  List<Breakable> GetBreakables() => new List<Breakable>(FindObjectsOfType<Breakable>());
 
   void Start()
   {
-    destroyEvent = new UnityEvent();
-    destroyEvent.AddListener(BreakableDestroyed);
-    breakables = new List<Breakable>(FindObjectsOfType<Breakable>());
+    breakables = GetBreakables();
 
     foreach (var breakable in breakables)
-      breakable.OnBreak = () => destroyEvent.Invoke();
+      breakable.OnBreak.AddListener(() => BreakableDestroyed(breakable));
 
-    textbox.text = $"Bricks Left: {breakables.Count}";
+    bricksCountTextbox.text = $"Bricks Left: {breakables.Count}";
   }
 
-  void BreakableDestroyed()
+  void BreakableDestroyed(Breakable breakable)
   {
-    breakables = new List<Breakable>(FindObjectsOfType<Breakable>());
+    breakables.Remove(breakable);
 
-    textbox.text = $"Bricks Left: {breakables.Count}";
+    bricksCountTextbox.text = $"Bricks Left: {breakables.Count}";
   }
 }

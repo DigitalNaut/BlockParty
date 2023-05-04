@@ -1,64 +1,68 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(Breakable))]
 public class Explosive : MonoBehaviour
 {
-  [Range(0.1f, 4f)]
-  public float scale = 1f;
-
-  [Range(1, 32)]
-  public int divisions = 8;
+  [Range(0.1f, 4f)] public float scale = 1f;
+  [Range(1, 32)] public int divisions = 8;
 
   Breakable breakable;
   Vector3[] angles;
+  UnityEvent OnExplode = new UnityEvent();
+
+  void Awake()
+  {
+    OnExplode = new UnityEvent();
+    breakable = GetComponent<Breakable>();
+  }
 
   void OnEnable()
   {
-    breakable = GetComponent<Breakable>();
     angles = GetAngles();
+    breakable.OnBreak.AddListener(Explode);
   }
 
-  void OnDisable() => breakable.OnBreak -= Explode;
+  void OnDisable() => breakable.OnBreak.RemoveListener(Explode);
 
-  void Start() => breakable.OnBreak += Explode;
+  void OnDestroy() => OnExplode.RemoveAllListeners();
 
   Vector3[] GetAngles()
   {
+    if (divisions < 1)
+      throw new System.Exception("Divisions must be greater than 0");
+
     var length = transform.localScale.x * scale;
     var angle = 360f / divisions;
     var angles = new Vector3[divisions];
 
-    for (int i = 1; i <= divisions; i++)
-    {
-      var direction = Quaternion.Euler(0, 0, angle * i) * Vector3.right * length;
-      angles[i - 1] = direction;
-    }
+    for (int i = 0; i < divisions; i++)
+      angles[i] = Quaternion.Euler(0, 0, angle * i) * Vector3.right * length;
 
     return angles;
   }
 
   void Explode()
   {
-    var hits = new RaycastHit[8];
+    var hits = new RaycastHit[16];
 
     foreach (var direction in angles)
     {
-      Physics.RaycastNonAlloc(transform.position, direction, hits, transform.forward.x);
+      Physics.RaycastNonAlloc(transform.position, direction, hits, scale);
 
       foreach (var hit in hits)
       {
-        hit.collider.TryGetComponent(out Breakable hitCollider);
-        if (hitCollider != null)
-          hitCollider.Break(Random.Range(0.1f, 0.25f));
+        if (hit.collider && hit.collider.TryGetComponent(out Breakable breakable))
+          breakable.Break(Random.Range(0.1f, 0.25f));
       }
     }
+
+    OnExplode?.Invoke();
   }
 
   void OnDrawGizmosSelected()
   {
-    foreach (var direction in angles)
-      Gizmos.DrawRay(transform.position, direction);
+    angles ??= GetAngles();
+    foreach (var direction in angles) Gizmos.DrawRay(transform.position, direction * scale);
   }
-
-  void OnDestroy() => breakable.OnBreak -= Explode;
 }

@@ -65,6 +65,8 @@
         "Redirector",
         "respawn",
         "rigidbody",
-        "Rigidbody"
+        "Rigidbody",
+        "Textbox",
+        "UGUI"
     ]
 }

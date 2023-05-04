@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.VFX;
 
 public class Breakable : MonoBehaviour
 {
   public AudioClip AudioClip;
   public VisualEffect BreakEffect;
-  public Action OnBreak;
+  public UnityEvent OnBreak;
+
+  void Awake() => OnBreak = new UnityEvent();
 
   void OnCollisionStay(Collision collision) => Break();
 
@@ -15,11 +17,11 @@ public class Breakable : MonoBehaviour
 
   void OnTriggerEnter() => Break();
 
-  void OnDestroy() => OnBreak?.Invoke();
+  void OnDestroy() => OnBreak.RemoveAllListeners();
 
   public void Break(float delay = 0)
   {
-    IEnumerator subroutine()
+    IEnumerator breakSubroutine()
     {
       if (delay > 0)
         yield return new WaitForSeconds(delay);
@@ -33,13 +35,13 @@ public class Breakable : MonoBehaviour
         Destroy(BreakEffect.gameObject, 1f);
       }
 
+      OnBreak?.Invoke();
+
       yield return new WaitForFixedUpdate();
 
       Destroy(gameObject);
-
-      yield break;
     }
 
-    StartCoroutine(subroutine());
+    StartCoroutine(breakSubroutine());
   }
 }
