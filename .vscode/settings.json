@@ -60,12 +60,14 @@
         "lerp",
         "Lerp",
         "Mathf",
+        "raycast",
         "Raycast",
         "raycasting",
         "Redirector",
         "respawn",
         "rigidbody",
         "Rigidbody",
+        "Scriptable",
         "Textbox",
         "UGUI"
     ]
