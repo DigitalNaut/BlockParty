@@ -1,0 +1,54 @@
+{
+    "name": "InputActions",
+    "maps": [
+        {
+            "name": "Player",
+            "id": "94da9eeb-60ac-43a0-87ac-6da0e5d87fdb",
+            "actions": [
+                {
+                    "name": "DispenseBall",
+                    "type": "Button",
+                    "id": "ab93fb27-9229-4a7b-8b69-b81f2788023c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "VolleyBall",
+                    "type": "Button",
+                    "id": "be4135e4-4fb9-4770-91db-184e3bae8458",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "a564f8e8-3e37-4604-a3b3-e3f456cacccb",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DispenseBall",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f41fe93f-8bfc-4ab7-aed7-c338f3a35661",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "VolleyBall",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

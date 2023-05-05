@@ -4,32 +4,44 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class PaddleController : MonoBehaviour
 {
-  [SerializeField]
-  float SlideSpeed = 12f;
-  [SerializeField]
-  float MaxSpeed = 4f;
+  [SerializeField] float SlideSpeed = 12f;
+  [SerializeField] float MaxSpeed = 4f;
   new Rigidbody rigidbody;
+  Camera mainCamera;
+  Mouse currentMouse;
+  private Vector2 previousMousePosition;
 
-  private void Start()
+  private void Awake()
   {
     rigidbody = GetComponent<Rigidbody>();
+    mainCamera = Camera.main;
+    currentMouse = Mouse.current;
   }
 
-  private void FixedUpdate()
+  private void FixedUpdate() => TrackMouse();
+
+  private void TrackMouse()
   {
-    Vector3 mousePosition = Camera.main.ScreenToWorldPoint(
+    Vector2 currentMousePosition = currentMouse.position.ReadValue();
+    if (currentMousePosition == previousMousePosition)
+    {
+      rigidbody.velocity = Vector3.zero;
+      return;
+    }
+
+    previousMousePosition = currentMousePosition;
+
+    Vector3 mousePositionWorld = mainCamera.ScreenToWorldPoint(
         new Vector3(
-            Mouse.current.position.ReadValue().x,
-            Mouse.current.position.ReadValue().y,
-            -Camera.main.transform.position.z
+              currentMousePosition.x,
+              currentMousePosition.y,
+              -mainCamera.transform.position.z
             ));
 
-    var d = (mousePosition.x - transform.position.x);
-    var v = new Vector3(
-            d * Time.deltaTime * SlideSpeed,
-            0,
-            0);
-    rigidbody.AddForce(v);
-    rigidbody.velocity = Vector3.ClampMagnitude(rigidbody.velocity, Mathf.Min(d * d, MaxSpeed));
+    var distance = mousePositionWorld.x - transform.position.x;
+    var slideForce = new Vector3(distance * Time.fixedDeltaTime * SlideSpeed, 0, 0);
+    rigidbody.AddForce(slideForce);
+
+    rigidbody.velocity = Vector3.ClampMagnitude(rigidbody.velocity, Mathf.Min(distance * distance, MaxSpeed));
   }
 }

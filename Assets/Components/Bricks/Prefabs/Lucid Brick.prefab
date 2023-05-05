@@ -5,6 +5,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: -7215240182069164532, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
@@ -14,6 +15,10 @@ PrefabInstance:
     - target: {fileID: 536598501059661579, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: m_Material
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1696410922460156130, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
+      propertyPath: Boost
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1696410922460156130, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: Modifier
@@ -265,7 +270,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9218154161495362639, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: m_RootOrder
-      value: 0
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 9218154161495362639, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -308,15 +313,19 @@ PrefabInstance:
       value: 90
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 9218154161495362635, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7791355698504540770}
+    - targetCorrespondingSourceObject: {fileID: 4058740883585159924, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2685873352281820135}
   m_SourcePrefab: {fileID: 100100000, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
 --- !u!1 &4410859548305466770 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9218154161495362635, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
-  m_PrefabInstance: {fileID: 4817711669895195097}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &8829439463222000429 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4058740883585159924, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
   m_PrefabInstance: {fileID: 4817711669895195097}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &7791355698504540770
@@ -331,9 +340,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 399c5bcc5387f6c49835981813735108, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BallManager: {fileID: 0}
-  RecallEffect: {fileID: 0}
-  VFXName: PlayInvoke
+  ballManager: {fileID: 0}
+  recallEffect: {fileID: 11400000, guid: 55729efe15180b54cb805ea798cddd20, type: 2}
+--- !u!1 &8829439463222000429 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4058740883585159924, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
+  m_PrefabInstance: {fileID: 4817711669895195097}
+  m_PrefabAsset: {fileID: 0}
 --- !u!73398921 &2685873352281820135
 VFXRenderer:
   serializedVersion: 1
@@ -346,6 +359,7 @@ VFXRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 0
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0

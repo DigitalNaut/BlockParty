@@ -1,165 +1,192 @@
-﻿using System;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(AudioSource))]
+[RequireComponent(typeof(PlayerInput))]
 public class BallManager : MonoBehaviour
 {
-  public BallProjectile MainBallPrefab;
-  public BallProjectile LucidBallPrefab;
-  public AudioClip BallSwapSound;
+  [Header("Volley")]
+  [SerializeField][Range(0.1f, 30f)] float VolleyThrustSpeed = 15f;
+  [SerializeField][Range(0f, 1f)] float VolleyOffsetDistance = 0.5f;
 
-  public float VolleyThrust = 15f;
-  public float VolleyOffsetDistance = 0.5f;
-  BallProjectile lucidBall = null;
+  [Header("Prefabs")]
+  [SerializeField] Transform Paddle;
+  [SerializeField] BallProjectile[] BallPrefabs;
+
+  PlayerInput playerInput;
   Coroutine dispenseRoutine;
-  Coroutine paddleTrackRoutine;
-  AudioSource audioSource;
+  BallProjectile ballOnPaddle;
+  Queue<BallProjectile> BallQueue = new Queue<BallProjectile>();
+  BallsHolster activeBalls;
 
-  public BallProjectile MainBall { get; private set; } = null;
+  Vector3 PositionOnPaddle => Paddle.position + Vector3.up * VolleyOffsetDistance;
+  public AudioSource AudioSource { get; private set; }
 
-  public BallProjectile GetLucidBall(out bool lucidBallWasActive)
+  void Awake()
   {
-    if (lucidBall == null)
+    AudioSource = GetComponent<AudioSource>();
+    playerInput = GetComponent<PlayerInput>();
+
+    Debug.Assert(Paddle != null, "Paddle not set.", transform);
+    Debug.Assert(BallPrefabs != null && BallPrefabs.Length > 0, "No ball prefabs set.", transform);
+
+    activeBalls = gameObject.AddComponent<BallsHolster>();
+
+    InitBallQueue();
+  }
+
+  void Start() => DispenseNextBall();
+
+  void OnEnable()
+  {
+    playerInput.onDispenseBall.AddListener(DispenseBallHandler);
+    playerInput.onVolleyBall.AddListener(VolleyBallHandler);
+  }
+
+  void OnDisable()
+  {
+    playerInput.onDispenseBall.RemoveListener(DispenseBallHandler);
+    playerInput.onVolleyBall.RemoveListener(VolleyBallHandler);
+  }
+
+  void OnDestroy() => StopAllCoroutines();
+
+  void InitBallQueue()
+  {
+    foreach (var ball in BallPrefabs)
     {
-      lucidBall = Instantiate(LucidBallPrefab);
-      var tracker = lucidBall.gameObject.AddComponent<CollisionTracker>();
-      tracker.CollisionAction = SwapLucidBall;
-    }
-
-    lucidBallWasActive = lucidBall.gameObject.activeInHierarchy;
-
-    lucidBall.gameObject.SetActive(false);
-    return lucidBall;
-  }
-
-  void SwapLucidBall(Collider collider)
-  {
-    // Guard
-    if (!collider.GetComponent<PaddleController>()) return;
-    if (MainBall.gameObject.activeInHierarchy) return;
-
-    // Swap lucid ball for regular ball
-    lucidBall.transform.gameObject.SetActive(false);
-    MainBall.transform.position = lucidBall.transform.position;
-    MainBall.gameObject.SetActive(true);
-    Volley(lucidBall.GetComponent<Rigidbody>().velocity);
-
-    // Play VFX
-    lucidBall.PlaySwapEffect();
-    MainBall.PlaySwapEffect();
-
-    // Play sound
-    if (BallSwapSound && audioSource != null) audioSource.PlayOneShot(BallSwapSound);
-
-    // Prevent from dispensing a new ball
-    if (dispenseRoutine != null) StopCoroutine(dispenseRoutine);
-  }
-
-  void Start()
-  {
-    StartCoroutine(Dispense(0f));
-
-    Debug.Assert(MainBallPrefab != null, "Main ball not set.", transform);
-    Debug.Assert(GetLucidBall(out _) != null, "Lucid ball not set.", transform);
-    Debug.Assert(BallSwapSound != null, "Ball swap sound not set.", transform);
-
-    audioSource = GetComponent<AudioSource>();
-  }
-
-  void Update()
-  {
-    var keyboard = Keyboard.current;
-    if (keyboard == null) return;
-
-    if (keyboard.spaceKey.wasPressedThisFrame)
-    {
-      if (!MainBall.isActiveAndEnabled && dispenseRoutine == null)
-      {
-        Debug.Log("Dispensing ball");
-        dispenseRoutine = StartCoroutine(Dispense(0.15f));
-      }
-      else if (MainBall.isActiveAndEnabled)
-        Debug.Log("Ball already active");
-      else
-        Debug.Log("Dispense already in progress");
+      var ballInstance = Instantiate(ball);
+      ballInstance.gameObject.SetActive(false);
+      BallQueue.Enqueue(ballInstance);
     }
   }
 
-  IEnumerator PaddleTrackBall()
+  public void BallDestroyedCallback(BallProjectile target)
   {
-    while (MainBall)
-    {
-      MainBall.transform.position =
-          transform.position +
-          Vector3.up * VolleyOffsetDistance;
-
-      if (Mouse.current.leftButton.isPressed)
-      {
-        Volley(Vector3.up * VolleyThrust);
-        yield break;
-      }
-      else yield return new WaitForFixedUpdate();
-    }
-
-    paddleTrackRoutine = null;
+    target.transform.gameObject.SetActive(false);
+    activeBalls.RemoveBall(target);
   }
 
-  void Volley(Vector3 vector)
+  public void VolleyBall(BallProjectile ball, Vector3 vector)
   {
+    TakeBallOffPaddle();
+
     // Set ball properties
-    MainBall.GetComponent<Rigidbody>().useGravity = true;
-    MainBall.GetComponent<Collider>().enabled = true;
-    MainBall.transform.parent = transform.parent.transform;
-    MainBall.OnDestroyCallback = BallDestroyedCallback;
+    ball.GetComponent<Rigidbody>().useGravity = true;
+    ball.GetComponent<Collider>().enabled = true;
+    ball.transform.parent = transform.parent.transform;
 
     // Throw it
-    MainBall.Launch(vector);
+    ball.Launch(vector);
+
+    // Add it to the active balls list
+    activeBalls.AddBall(ball);
   }
 
-  IEnumerator Dispense(float waitTime)
+  IEnumerator DispenseBall(BallProjectile ball, float delay)
   {
-    if (MainBallPrefab == null)
-      throw new Exception("Main ball prefab not set.");
+    if (ballOnPaddle != null)
+    {
+      Debug.LogWarning("Paddle tracking routine running; can't dispense ball.");
+      yield break;
+    }
 
-    yield return new WaitForSeconds(waitTime);
+    yield return new WaitForSeconds(delay);
 
-    if (MainBall == null)
-      MainBall = Instantiate(MainBallPrefab);
-    if (lucidBall == null)
-      lucidBall = GetLucidBall(out _);
+    ball.GetComponent<Rigidbody>().useGravity = false;
+    ball.GetComponent<Collider>().enabled = false;
+    ball.gameObject.SetActive(true);
+    ball.OnDestroyCallback += BallDestroyedCallback;
 
-    MainBall.GetComponent<Rigidbody>().useGravity = false;
-    MainBall.GetComponent<Collider>().enabled = false;
-    MainBall.gameObject.SetActive(true);
-
-    paddleTrackRoutine = StartCoroutine(PaddleTrackBall());
+    PutBallOnPaddle(ball);
 
     dispenseRoutine = null;
   }
 
-  void OnDisable() => StopAllCoroutines();
+  public BallProjectile DispenseNextBall(float delay = 0f, bool reuseBall = false)
+  {
+    if (BallQueue.Count == 0)
+    {
+      Debug.Log("No balls in queue.");
+      return null;
+    }
 
-  void OnDestroy() => StopAllCoroutines();
+    if (!activeBalls.CanAddBalls)
+    {
+      Debug.LogWarning("No more balls allowed.");
+      return null;
+    }
+
+    var ball = BallQueue.Dequeue();
+    if (reuseBall) BallQueue.Enqueue(ball);
+
+    dispenseRoutine = StartCoroutine(DispenseBall(ball, delay));
+
+    return ball;
+  }
+
+  void PutBallOnPaddle(BallProjectile ball)
+  {
+    ball.transform.parent = Paddle;
+    ball.transform.position = PositionOnPaddle;
+    ball.SetKinematic(true);
+
+    ballOnPaddle = ball;
+  }
+
+  BallProjectile TakeBallOffPaddle()
+  {
+    if (ballOnPaddle == null)
+    {
+      Debug.LogWarning("No ball on paddle.");
+      return null;
+    }
+
+    var ball = ballOnPaddle;
+    ballOnPaddle = null;
+    ball.transform.parent = null;
+    ball.SetKinematic(false);
+
+    return ball;
+  }
+
+  void DispenseBallHandler()
+  {
+    if (dispenseRoutine == null)
+    {
+      Debug.Log("Dispensing ball");
+      DispenseNextBall();
+    }
+    else Debug.Log("Dispense already in progress");
+  }
+
+  void VolleyBallHandler()
+  {
+    if (ballOnPaddle == null)
+    {
+      Debug.Log("No ball on paddle.");
+      return;
+    }
+
+    var ball = TakeBallOffPaddle();
+
+    VolleyBall(ball, Vector3.up * VolleyThrustSpeed);
+  }
 
   void OnDrawGizmosSelected()
   {
-    Debug.DrawRay(transform.position, Vector3.up * VolleyOffsetDistance, Color.blue);
+    // Draw distance offset of the ball from the paddle
+    Gizmos.color = Color.red;
+    Gizmos.DrawRay(Paddle.position, Vector3.up * VolleyOffsetDistance);
 
+    // Draw a line pointing to the paddle
+    Gizmos.color = Color.green;
+    Gizmos.DrawLine(transform.position, Paddle.position);
+
+    // Draw the volley offset point
     Gizmos.color = Color.yellow;
-    Gizmos.DrawWireSphere(transform.position + Vector3.up * VolleyOffsetDistance, 0.2f);
-  }
-
-  public void BallDestroyedCallback(BallProjectile target) => target.transform.gameObject.SetActive(false);
-}
-
-public class CollisionTracker : MonoBehaviour
-{
-  public Action<Collider> CollisionAction;
-
-  void OnCollisionEnter(Collision collision)
-  {
-    CollisionAction?.Invoke(collision.collider);
+    Gizmos.DrawWireSphere(PositionOnPaddle, 0.2f);
   }
 }

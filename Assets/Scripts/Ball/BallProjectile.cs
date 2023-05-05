@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -17,12 +16,9 @@ public class BallProjectile : MonoBehaviour
 
   new Rigidbody rigidbody;
   AudioSource audioSource;
+  Action speedModulator;
 
-  Coroutine speedModulator;
-
-  public delegate void Callback(BallProjectile target);
-  public Callback OnDestroyCallback;
-
+  public Action<BallProjectile> OnDestroyCallback;
 
   float Speed
   {
@@ -37,22 +33,32 @@ public class BallProjectile : MonoBehaviour
     KeepFastest,
   }
 
-  void Start()
+  public void SetKinematic(bool isKinematic)
+  {
+    rigidbody.isKinematic = isKinematic;
+    speedModulator = isKinematic ? null : ManageSpeed;
+  }
+
+  void Awake()
   {
     rigidbody = GetComponent<Rigidbody>();
     audioSource = GetComponent<AudioSource>();
+    
+    SetKinematic(false);
   }
 
   void OnCollisionExit(Collision collision)
   {
     Breakable breakableObj = collision.gameObject.GetComponent<Breakable>();
 
-    if (!breakableObj && audioSource != null && audioSource.enabled)
+    if (breakableObj != null && audioSource != null && audioSource.enabled)
       audioSource.Play();
   }
 
   void ManageSpeed()
   {
+    if (rigidbody.isKinematic) return;
+
     bool isTooSlow = Speed < MinSpeed;
     bool isSpeeding = Speed > MaxSpeed;
     bool isOutsideOfBounds = isTooSlow || isSpeeding;
@@ -66,14 +72,11 @@ public class BallProjectile : MonoBehaviour
     }
   }
 
-  void FixedUpdate() => ManageSpeed();
+  void FixedUpdate() => speedModulator?.Invoke();
 
-  void OnDisable()
-  {
-    StopAllCoroutines();
-  }
+  void OnDisable() => StopAllCoroutines();
 
-  public void Destroy()
+  public void DestroyProjectile()
   {
     StopAllCoroutines();
 
@@ -93,6 +96,7 @@ public class BallProjectile : MonoBehaviour
     // Otherwise, disable
     else Destroy(gameObject);
   }
+
   public void PlaySwapEffect()
   {
     if (BallSwapEffect)
@@ -102,6 +106,7 @@ public class BallProjectile : MonoBehaviour
       BallSwapEffect.SendEvent("PlayBurst");
     }
   }
+
   public void Launch(Vector3 launchVelocity, BoosterMode mode = BoosterMode.Absolute, float modifier = 1.0f)
   {
     if (rigidbody == null)
@@ -110,6 +115,7 @@ public class BallProjectile : MonoBehaviour
     rigidbody.velocity = launchVelocity.normalized;
     Boost(launchVelocity.magnitude, mode, modifier);
   }
+
   public void Boost(float launchVelocity, BoosterMode mode = BoosterMode.Absolute, float modifier = 1.0f)
   {
     float newVelocity = Speed * modifier + launchVelocity;
@@ -121,6 +127,7 @@ public class BallProjectile : MonoBehaviour
       _ => newVelocity,
     };
   }
+
   public void Bump(float boostSpeed, float modifier = 1.0f)
   {
     Vector3 rbVel = rigidbody.velocity;
@@ -129,8 +136,6 @@ public class BallProjectile : MonoBehaviour
 
     Speed = newVelocity;
   }
-  internal void SetDirection(Vector3 newDirection)
-  {
-    rigidbody.velocity = newDirection.normalized * Speed;
-  }
+
+  internal void SetDirection(Vector3 newDirection) => rigidbody.velocity = newDirection.normalized * Speed;
 }

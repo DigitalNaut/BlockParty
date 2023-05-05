@@ -4,9 +4,7 @@ public class BallDestroyer : MonoBehaviour
 {
   private void OnCollisionEnter(Collision collision)
   {
-    BallProjectile targetObject = collision.gameObject.GetComponent<BallProjectile>();
-
-    if (targetObject)
-      targetObject.Destroy();
+    if (collision.gameObject.TryGetComponent(out BallProjectile ball))
+      ball.DestroyProjectile();
   }
 }
