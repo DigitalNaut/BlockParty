@@ -1,31 +1,65 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using NaughtyAttributes;
 using UnityEngine;
 
 public class BrickWallGenerator : MonoBehaviour
 {
-  public Renderer[] Bricks;
-
-  public int Columns = 0;
-  public int Rows = 0;
-  public Vector2 Padding;
+  [Header("Prefabs")]
+  [SerializeField] Renderer[] BrickPrefabs = new Renderer[0];
+  [Header("Settings")]
+  [SerializeField] int Columns = 16;
+  [SerializeField] int Rows = 9;
+  [SerializeField] Vector2 Padding = new Vector2(0.6f, 0.6f);
+  [Header("Debug")]
   [ReadOnly] public List<Vector3> Positions;
-  public BallManager ballManager;
+  [Button("Make Brick Manager's Wall Generator", EButtonEnableMode.Editor)]
+  void MakeBrickManagerWallGenerator()
+  {
+    var brickManager = FindObjectOfType<BrickManager>();
+    if (brickManager) brickManager.SetBrickWallGenerator(this);
+  }
 
-  void Start() => BuildWall();
-
-  float ItemWidth { get => Bricks.Length > 0 && !!Bricks[0] ? Bricks[0].bounds.size.x + Padding.x : 0; }
-  float ItemHeight { get => Bricks.Length > 0 && !!Bricks[0] ? Bricks[0].bounds.size.y + Padding.y : 0; }
+  float ItemWidth { get => BrickPrefabs.Length > 0 && !!BrickPrefabs[0] ? BrickPrefabs[0].bounds.size.x + Padding.x : 0; }
+  float ItemHeight { get => BrickPrefabs.Length > 0 && !!BrickPrefabs[0] ? BrickPrefabs[0].bounds.size.y + Padding.y : 0; }
 
   float WallWidth { get => ItemWidth * (Columns - 1); }
   float WallHeight { get => ItemHeight * (Rows - 1); }
 
+  void Awake() => Debug.Assert(BrickPrefabs.Length > 0, "BrickPrefabs is empty", transform);
+
+  public List<Breakable> BuildBreakablesWall()
+  {
+    Debug.Log("Building Breakables Wall");
+
+    if (Positions?.Count == 0)
+      Positions = CalculatePositions();
+
+    GameObject newBrick;
+
+    List<Breakable> newBreakables = new List<Breakable>();
+
+    foreach (var position in Positions)
+    {
+      newBrick = GetRandomBrick();
+      newBrick.transform.position = position;
+      newBrick.transform.SetParent(transform);
+      newBrick.SetActive(true);
+
+      Breakable newBreakable = newBrick.GetComponent<Breakable>();
+      if (newBreakable) newBreakables.Add(newBreakable);
+    }
+
+    Debug.Log($"Built {newBreakables.Count} Breakables");
+
+    return newBreakables;
+  }
 
   List<Vector3> CalculatePositions()
   {
     var positionsList = new List<Vector3>();
 
-    if (Bricks.Length > 0)
+    if (BrickPrefabs.Length > 0)
     {
       for (int w = 0; w < Columns; w++)
       {
@@ -45,27 +79,11 @@ public class BrickWallGenerator : MonoBehaviour
     return positionsList;
   }
 
-  void BuildWall()
-  {
-    if (Positions?.Count == 0)
-      Positions = CalculatePositions();
-
-    GameObject newBrick;
-
-    foreach (var position in Positions)
-    {
-      newBrick = GetRandomBrick();
-      newBrick.transform.position = position;
-      newBrick.transform.SetParent(transform);
-      newBrick.SetActive(true);
-    }
-  }
-
   GameObject GetRandomBrick()
   {
-    int randInt = UnityEngine.Random.Range(0, Bricks.Length);
+    int randInt = Random.Range(0, BrickPrefabs.Length);
 
-    return Instantiate(Bricks[randInt].gameObject);
+    return Instantiate(BrickPrefabs[randInt].gameObject);
   }
 
   void OnDrawGizmos()
@@ -76,18 +94,24 @@ public class BrickWallGenerator : MonoBehaviour
 
   void OnDrawGizmosSelected()
   {
-    foreach (var position in Positions)
+    if (BrickPrefabs.Length == 0) return;
+
+    Color meshColor;
+    Renderer sample;
+    Mesh mesh;
+    var indexedPositions = CalculatePositions().Select((position, index) => (index, position));
+
+    foreach (var (index, position) in indexedPositions)
     {
-      Gizmos.color = Color.yellow;
+      sample = BrickPrefabs[index % BrickPrefabs.Length];
+      if (!sample) continue;
 
-      Gizmos.DrawWireCube(new Vector3(position.x, position.y, Mathf.Epsilon), new Vector3(ItemWidth, ItemHeight, Mathf.Epsilon));
+      mesh = sample.GetComponent<MeshFilter>().sharedMesh;
+      meshColor = sample.sharedMaterial.color;
+      meshColor.a = 0.1f;
 
-      if (Bricks.Length > 0 && Bricks[0])
-      {
-        Renderer sample = Bricks[0];
-        Mesh mesh = sample.GetComponent<MeshFilter>().sharedMesh;
-        Gizmos.DrawWireMesh(mesh, position, sample.transform.rotation, sample.transform.localScale);
-      }
-    };
+      Gizmos.color = meshColor;
+      Gizmos.DrawWireMesh(mesh, position, sample.transform.rotation, sample.transform.localScale);
+    }
   }
 }

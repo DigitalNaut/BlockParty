@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -6,15 +8,22 @@ using UnityEngine;
 /// </summary>
 public class BreakableRemover : MonoBehaviour
 {
-  void Awake() => StartCoroutine(ClearOverlappingBreakables());
+  public void ClearOverlappingBreakables(List<Breakable> breakables) => StartCoroutine(ClearOverlap(breakables));
 
-  IEnumerator ClearOverlappingBreakables()
+  IEnumerator ClearOverlap(List<Breakable> breakables)
   {
     yield return new WaitForFixedUpdate();
+
+    Debug.Log("Clearing Overlapping Breakables");
+
+    if (breakables?.Count == 0)
+      throw new ArgumentNullException("breakables", "Breakables list is null or empty");
 
     // Get the child static colliders that overlap the Breakables
     var childColliders = GetComponentsInChildren<Collider>();
     Collider[] collidersOverlapped;
+
+    var removedCount = 0;
 
     foreach (var collider in childColliders)
     {
@@ -30,23 +39,30 @@ public class BreakableRemover : MonoBehaviour
             Debug.LogError("Overlapped collider is null");
           else if (collider == null)
             Debug.LogError("Collider is null");
-
           continue;
         }
+
         if (Physics.ComputePenetration(collider, collider.transform.position, collider.transform.rotation,
           overlappedCollider, overlappedCollider.transform.position, overlappedCollider.transform.rotation,
           out var _, out var _))
         {
-          if (overlappedCollider.TryGetComponent(out Breakable _))
+          if (overlappedCollider.TryGetComponent(out Breakable breakable))
           {
             if (overlappedCollider.TryGetComponent(out Explosive explosive))
               explosive.enabled = false;
 
-            if (overlappedCollider.gameObject)
+            if (breakables.Remove(breakable))
+            {
               Destroy(overlappedCollider.gameObject);
+              removedCount++;
+            }
+            else Debug.LogWarning($"Failed to remove {overlappedCollider.name} from {collider.name}", transform);
           }
         }
       }
+
     }
+
+    Debug.Log($"Removed {removedCount} Overlapping Breakables");
   }
 }
