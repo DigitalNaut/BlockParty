@@ -8,9 +8,17 @@ public class BallSpeedModifier : MonoBehaviour
 
   [Range(0.0f, 1.0f)] public float Modifier = 1.0f;
 
-  private void OnCollisionExit(Collision collision)
+  void OnCollisionExit(Collision collision)
   {
     BallProjectile launchableObj = collision.gameObject.GetComponent<BallProjectile>();
+
+    if (launchableObj)
+      launchableObj.Boost(Boost, BounceMode, Modifier);
+  }
+
+  void OnTriggerEnter(Collider other)
+  {
+    BallProjectile launchableObj = other.gameObject.GetComponent<BallProjectile>();
 
     if (launchableObj)
       launchableObj.Boost(Boost, BounceMode, Modifier);
