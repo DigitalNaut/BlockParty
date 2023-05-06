@@ -5,8 +5,10 @@ using UnityEngine.VFX;
 
 public class Breakable : MonoBehaviour
 {
-  public AudioClip AudioClip;
-  public VisualEffect BreakEffect;
+  [SerializeField] AudioClip AudioClip;
+  [SerializeField] VisualEffect BreakEffect;
+  [SerializeField] string BreakEffectEventName = "PlayBurst";
+
   public UnityEvent OnBreak;
 
   void Awake() => OnBreak = new UnityEvent();
@@ -31,7 +33,7 @@ public class Breakable : MonoBehaviour
       if (BreakEffect)
       {
         BreakEffect.transform.parent = null;
-        BreakEffect.SendEvent("PlayBurst");
+        BreakEffect.SendEvent(BreakEffectEventName);
         Destroy(BreakEffect.gameObject, 1f);
       }
 

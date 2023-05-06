@@ -11,8 +11,8 @@ public class BallsHolster : MonoBehaviour
 
   public bool CanAddBalls => ballsList.Count < lucidBallsAllowed;
   public bool CanRemoveBalls => ballsList.Count > minLucidBallsLimit;
-  public uint ChangeLucidBallsMaxLimit(uint increment = 1) => (uint)Mathf.Clamp(lucidBallsAllowed += increment, minLucidBallsLimit, maxLucidBallsLimit);
-  public void SetLucidBallsMaxLimit(uint newLimit) => lucidBallsAllowed = (uint)Mathf.Clamp(newLimit, minLucidBallsLimit, maxLucidBallsLimit);
+  public uint ChangeBallsMaxLimit(uint increment = 1) => (uint)Mathf.Clamp(lucidBallsAllowed += increment, minLucidBallsLimit, maxLucidBallsLimit);
+  public void SetBallsMaxLimit(uint newLimit) => lucidBallsAllowed = (uint)Mathf.Clamp(newLimit, minLucidBallsLimit, maxLucidBallsLimit);
 
   public bool AddBall(BallProjectile ball)
   {
@@ -31,7 +31,7 @@ public class BallsHolster : MonoBehaviour
     ballsList.Remove(ball);
   }
 
-  public BallProjectile GetOldestLucidBall(bool isActive = false)
+  public BallProjectile GetOldestLucidBall(bool isActive)
   {
     if (ballsList.Count == 0) return null;
 
