@@ -8,7 +8,7 @@ public class LucidBallSpawner : MonoBehaviour
 
   void Awake() => Debug.Assert(lucidBallManager != null, "Lucid ball manager not set.", transform);
 
-  void OnCollisionEnter(Collision collision) => lucidBallManager.SpawnLucidBall(collision);
+  void OnCollisionEnter(Collision collision) => lucidBallManager.SpawnLucidBall(transform, collision);
 
   void OnDrawGizmosSelected() => Debug.DrawLine(transform.position, lucidBallManager.gameObject.transform.position, Color.cyan);
 }

@@ -2,6 +2,7 @@
 using UnityEngine;
 using NaughtyAttributes;
 using System.Collections.Generic;
+using UnityEditor;
 
 /// <summary>
 /// This class is responsible for spawning the lucid ball and playing the VFX animations.
@@ -14,9 +15,11 @@ public class LucidBallManager : MonoBehaviour
   [Header("VFX")]
   [SerializeField][Expandable] VFXEvent implodeVFXEvent;
   [SerializeField][Expandable] VFXEvent explodeVFXEvent;
-  [SerializeField][Expandable] VFXEvent recallEffect;
   [Header("SFX")]
   [SerializeField] AudioClip BallUpgradeSound;
+
+  VFXEvent implodeVFX;
+  VFXEvent explodeVFX;
 
   BallManager ballManager;
   BallsHolster ballsHolster;
@@ -29,10 +32,13 @@ public class LucidBallManager : MonoBehaviour
     Debug.Assert(BallUpgradeSound != null, "Ball swap sound not set.", transform);
     Debug.Assert(implodeVFXEvent != null, "Implode VFX event not set.", transform);
     Debug.Assert(explodeVFXEvent != null, "Explode VFX event not set.", transform);
-    Debug.Assert(recallEffect != null, "Recall VFX event not set.", transform);
+
+    implodeVFX = Instantiate(implodeVFXEvent);
+    explodeVFX = Instantiate(explodeVFXEvent);
 
     ballManager = GetComponent<BallManager>();
     ballsHolster = gameObject.AddComponent<BallsHolster>();
+    ballsHolster.SetBallsMaxLimit(5);
   }
 
   void OnDisable() => StopAllCoroutines();
@@ -48,20 +54,20 @@ public class LucidBallManager : MonoBehaviour
     return newBall;
   }
 
-  public void SpawnLucidBall(Collision collision)
+  public void SpawnLucidBall(Transform spawner, Collision collision)
   {
-    var newLucidBall = ballsHolster.CanAddBalls ? NewLucidBall(false, transform) : ballsHolster.GetOldestLucidBall();
+    var newLucidBall = ballsHolster.CanAddBalls ? NewLucidBall(false) : ballsHolster.GetOldestLucidBall(false);
     ballsHolster.AddBall(newLucidBall);
 
     // Set the lucid ball's position and velocity
-    newLucidBall.transform.position = collision.transform.position;
+    newLucidBall.transform.position = spawner.position;
     if (collision.rigidbody != null)
       newLucidBall.GetComponent<Rigidbody>().velocity = collision.rigidbody.velocity;
 
     // Show lucid ball after VFX
     IEnumerator Animate()
     {
-      yield return PlaySpawnVFX(collision.transform.position);
+      yield return PlaySpawnVFX(spawner.position);
       newLucidBall.gameObject.SetActive(true);
     }
 
@@ -70,7 +76,8 @@ public class LucidBallManager : MonoBehaviour
 
   IEnumerator PlaySpawnVFX(Vector3 position)
   {
-    yield return StartCoroutine(implodeVFXEvent.PlayEffectAtPosition(position, 0.4f));
-    yield return StartCoroutine(explodeVFXEvent.PlayEffectAtPosition(position, 0.4f));
+    Debug.DrawLine(transform.position, position, Color.green, 1f);
+    yield return StartCoroutine(explodeVFX.PlayEffectAtPosition(position));
+    yield return StartCoroutine(implodeVFX.PlayEffectAtPosition(position));
   }
 }
