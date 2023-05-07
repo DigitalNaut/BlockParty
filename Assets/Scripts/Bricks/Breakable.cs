@@ -1,17 +1,24 @@
 ﻿using System.Collections;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.VFX;
 
+[Icon("Assets/Textures/Icons/FragileWarning.png")]
 public class Breakable : MonoBehaviour
 {
-  [SerializeField] AudioClip AudioClip;
-  [SerializeField] VisualEffect BreakEffect;
+  [Header("Dependencies")]
+  [Required][SerializeField] AudioClip AudioClip;
+  [Required][SerializeField] VisualEffect BreakEffect;
+
+  [Header("Settings")]
   [SerializeField] string BreakEffectEventName = "PlayBurst";
 
-  public UnityEvent OnBreak;
+  [Foldout("Events")] public UnityEvent<Breakable> OnBreak;
 
-  void Awake() => OnBreak = new UnityEvent();
+  void Awake() => Debug.Assert(string.IsNullOrEmpty(BreakEffectEventName) == false, "BreakEffectEventName is empty");
+
+  void Start() => OnBreak ??= new UnityEvent<Breakable>();
 
   void OnCollisionStay(Collision collision) => Break();
 
@@ -37,7 +44,7 @@ public class Breakable : MonoBehaviour
         Destroy(BreakEffect.gameObject, 1f);
       }
 
-      OnBreak?.Invoke();
+      OnBreak?.Invoke(this);
 
       yield return new WaitForFixedUpdate();
 

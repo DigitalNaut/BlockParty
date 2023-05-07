@@ -1,12 +1,15 @@
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
+[Icon("Assets/Textures/Icons/Joystick.png")]
 public class PlayerInput : MonoBehaviour
 {
+  [Foldout("Events")] public UnityEvent onDispenseBall;
+  [Foldout("Events")] public UnityEvent onVolleyBall;
+
   InputActions inputActions;
-  public UnityEvent onDispenseBall;
-  public UnityEvent onVolleyBall;
 
   void Awake() => inputActions = new InputActions();
 

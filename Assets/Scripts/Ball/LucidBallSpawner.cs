@@ -4,9 +4,7 @@ using NaughtyAttributes;
 [RequireComponent(typeof(Collider))]
 public class LucidBallSpawner : MonoBehaviour
 {
-  [SerializeField] LucidBallManager lucidBallManager;
-
-  void Awake() => Debug.Assert(lucidBallManager != null, "Lucid ball manager not set.", transform);
+  [Required][SerializeField] LucidBallManager lucidBallManager;
 
   void OnCollisionEnter(Collision collision) => lucidBallManager.SpawnLucidBall(transform, collision);
 

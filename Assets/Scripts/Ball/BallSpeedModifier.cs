@@ -1,26 +1,28 @@
+using System;
 using UnityEngine;
 
+[Icon("Assets/Textures/Icons/Spedometer.png")]
 public class BallSpeedModifier : MonoBehaviour
 {
+  [Header("Settings")]
+  [Tooltip("The operation to use when boosting the ball when comparing the current or the new velocity.")]
   public BallProjectile.BoosterMode BounceMode;
+  [Range(0.0f, 100.0f)] public float Boost = 10.0f;
+  [Range(0.0f, 2.0f)] public float Modifier = 1.0f;
 
-  [Range(0.0f, 1000.0f)] public float Boost = 10.0f;
+  delegate void ProjectileModifier(Collider collider);
+  ProjectileModifier modifyProjectileSpeed;
 
-  [Range(0.0f, 1.0f)] public float Modifier = 1.0f;
+  void OnEnable() => modifyProjectileSpeed = ModifyProjectileSpeed;
+  void OnDisable() => modifyProjectileSpeed = null;
 
-  void OnCollisionExit(Collision collision)
+  void ModifyProjectileSpeed(Collider collider)
   {
-    BallProjectile launchableObj = collision.gameObject.GetComponent<BallProjectile>();
-
-    if (launchableObj)
-      launchableObj.Boost(Boost, BounceMode, Modifier);
+    if (collider.TryGetComponent(out BallProjectile launchableObj))
+      launchableObj.Modify(Boost, BounceMode, Modifier);
   }
 
-  void OnTriggerEnter(Collider other)
-  {
-    BallProjectile launchableObj = other.gameObject.GetComponent<BallProjectile>();
+  void OnCollisionEnter(Collision collision) => modifyProjectileSpeed?.Invoke(collision.collider);
 
-    if (launchableObj)
-      launchableObj.Boost(Boost, BounceMode, Modifier);
-  }
+  void OnTriggerEnter(Collider collider) => modifyProjectileSpeed?.Invoke(collider);
 }

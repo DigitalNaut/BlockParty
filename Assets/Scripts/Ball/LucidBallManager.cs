@@ -1,44 +1,44 @@
 ﻿using System.Collections;
 using UnityEngine;
 using NaughtyAttributes;
-using System.Collections.Generic;
-using UnityEditor;
 
 /// <summary>
 /// This class is responsible for spawning the lucid ball and playing the VFX animations.
 /// </summary>
+
+// Set script icon
+[AddComponentMenu("Scripts/Ball/LucidBallManager")]
+[Icon("Assets/Textures/Icons/PurpleBallCog.png")]
 [RequireComponent(typeof(BallManager))]
 public class LucidBallManager : MonoBehaviour
 {
   [Header("Prefabs")]
-  [SerializeField] BallProjectile LucidBallPrefab;
+  [Required][SerializeField] BallProjectile LucidBallPrefab;
+
+  [Header("Dependencies")]
+  [Required][SerializeField] AudioSource AudioSource;
+
   [Header("VFX")]
-  [SerializeField][Expandable] VFXEvent implodeVFXEvent;
-  [SerializeField][Expandable] VFXEvent explodeVFXEvent;
+  [Required][SerializeField][Expandable] VFXEvent implodeVFXEvent;
+  [Required][SerializeField][Expandable] VFXEvent explodeVFXEvent;
+  [Required][SerializeField][Expandable] VFXEvent foulBallVFXEvent;
+
   [Header("SFX")]
-  [SerializeField] AudioClip BallUpgradeSound;
+  [Required][SerializeField] AudioClip BallUpgradeSound;
 
   VFXEvent implodeVFX;
   VFXEvent explodeVFX;
-
-  BallManager ballManager;
-  BallsHolster ballsHolster;
-
-  AudioSource AudioSource => ballManager.AudioSource;
+  VFXEvent foulBallVFX;
+  ItemsHolster<BallProjectile> ballsHolster;
 
   void Awake()
   {
-    Debug.Assert(LucidBallPrefab != null, "Lucid ball prefab not set.", transform);
-    Debug.Assert(BallUpgradeSound != null, "Ball swap sound not set.", transform);
-    Debug.Assert(implodeVFXEvent != null, "Implode VFX event not set.", transform);
-    Debug.Assert(explodeVFXEvent != null, "Explode VFX event not set.", transform);
-
     implodeVFX = Instantiate(implodeVFXEvent);
     explodeVFX = Instantiate(explodeVFXEvent);
+    foulBallVFX = Instantiate(foulBallVFXEvent);
 
-    ballManager = GetComponent<BallManager>();
-    ballsHolster = gameObject.AddComponent<BallsHolster>();
-    ballsHolster.SetBallsMaxLimit(5);
+    ballsHolster = new ItemsHolster<BallProjectile>();
+    ballsHolster.SetMaxLimit(5);
   }
 
   void OnDisable() => StopAllCoroutines();
@@ -48,16 +48,22 @@ public class LucidBallManager : MonoBehaviour
     var newBall = Instantiate(LucidBallPrefab, parent);
     newBall.gameObject.SetActive(isActive);
     newBall.SetKinematic(false);
+    newBall.OnDestroyCallback += BallDestroyedCallback;
 
-    newBall.OnDestroyCallback += ballsHolster.RemoveBall;
+    newBall.OnDestroyCallback += ballsHolster.Remove;
 
     return newBall;
   }
 
+  public void BallDestroyedCallback(BallProjectile ball)
+  {
+    StartCoroutine(foulBallVFX.PlayEffectAtPosition(ball.transform.position));
+  }
+
   public void SpawnLucidBall(Transform spawner, Collision collision)
   {
-    var newLucidBall = ballsHolster.CanAddBalls ? NewLucidBall(false) : ballsHolster.GetOldestLucidBall(false);
-    ballsHolster.AddBall(newLucidBall);
+    var newLucidBall = ballsHolster.CanAddItems ? NewLucidBall(false) : ballsHolster.GetOldest(false);
+    ballsHolster.Add(newLucidBall);
 
     // Set the lucid ball's position and velocity
     newLucidBall.transform.position = spawner.position;

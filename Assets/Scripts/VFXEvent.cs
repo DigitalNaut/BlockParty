@@ -1,4 +1,5 @@
 using System.Collections;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -6,7 +7,7 @@ using UnityEngine.VFX;
 public class VFXEvent : ScriptableObject
 {
   [Tooltip("The prefab containing the Visual Effect to play.")]
-  public GameObject VFXPrefab;
+  [Required] public GameObject VFXPrefab;
 
   [Tooltip("The name of the event to send to the Visual Effect.")]
   public string VFXEventName = "OnPlay";
@@ -18,8 +19,6 @@ public class VFXEvent : ScriptableObject
 
   void Awake()
   {
-    Debug.Assert(VFXPrefab != null, "VFX Prefab is null", this);
-
     if (VFXPrefab != null)
     {
       VFX = Instantiate(VFXPrefab).GetComponent<VisualEffect>();
@@ -27,25 +26,20 @@ public class VFXEvent : ScriptableObject
     }
   }
 
-  void PlayVFX(Vector3 position)
-  {
-    if (VFX == null)
-      return;
-
-    VFX.transform.parent = null;
-    VFX.transform.position = position;
-    VFX.transform.localScale = Vector3.one;
-
-    VFX.SendEvent(VFXEventName);
-  }
-
   /// <summary>
   /// Plays the Visual Effect at the specified position.
   /// </summary>
-  public IEnumerator PlayEffectAtPosition(Vector3 position)
+  public IEnumerator PlayEffectAtPosition(Vector3 position, Vector3? scale = null)
   {
     yield return new WaitForSeconds(delay);
 
-    PlayVFX(position);
+    if (VFX == null)
+      yield break;
+
+    VFX.transform.parent = null;
+    VFX.transform.position = position;
+    if (scale != null) VFX.transform.localScale = (Vector3)scale;
+
+    VFX.SendEvent(VFXEventName);
   }
 }

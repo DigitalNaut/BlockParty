@@ -14,8 +14,6 @@ public class BreakableRemover : MonoBehaviour
   {
     yield return new WaitForFixedUpdate();
 
-    Debug.Log("Clearing Overlapping Breakables");
-
     if (breakables?.Count == 0)
       throw new ArgumentNullException("breakables", "Breakables list is null or empty");
 

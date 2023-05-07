@@ -3,14 +3,19 @@ using System.Linq;
 using NaughtyAttributes;
 using UnityEngine;
 
+[Icon("Assets/Textures/Icons/TrowelBrickWallIcon.png")]
 public class BrickWallGenerator : MonoBehaviour
 {
   [Header("Prefabs")]
-  [SerializeField] Renderer[] BrickPrefabs = new Renderer[0];
+  [SerializeField] Renderer[] BrickPrefabs;
+
   [Header("Settings")]
+  [OnValueChanged("CalculatePositions")]
   [SerializeField] int Columns = 16;
+  [OnValueChanged("CalculatePositions")]
   [SerializeField] int Rows = 9;
   [SerializeField] Vector2 Padding = new Vector2(0.6f, 0.6f);
+
   [Header("Debug")]
   [ReadOnly] public List<Vector3> Positions;
   [Button("Make Brick Manager's Wall Generator", EButtonEnableMode.Editor)]
@@ -26,14 +31,16 @@ public class BrickWallGenerator : MonoBehaviour
   float WallWidth { get => ItemWidth * (Columns - 1); }
   float WallHeight { get => ItemHeight * (Rows - 1); }
 
-  void Awake() => Debug.Assert(BrickPrefabs.Length > 0, "BrickPrefabs is empty", transform);
+  void Awake() => Debug.Assert(BrickPrefabs.Length > 0, "BrickPrefabs is empty");
+
+  void CalculatePositions() => Positions = CalculateGrid();
 
   public List<Breakable> BuildBreakablesWall()
   {
-    Debug.Log("Building Breakables Wall");
+    CalculatePositions();
 
     if (Positions?.Count == 0)
-      Positions = CalculatePositions();
+      Positions = CalculateGrid();
 
     GameObject newBrick;
 
@@ -55,17 +62,19 @@ public class BrickWallGenerator : MonoBehaviour
     return newBreakables;
   }
 
-  List<Vector3> CalculatePositions()
+  List<Vector3> CalculateGrid()
   {
+    Debug.Log("Calculating Grid");
+
     var positionsList = new List<Vector3>();
 
     if (BrickPrefabs.Length > 0)
     {
-      for (int w = 0; w < Columns; w++)
+      for (int col = 0; col < Columns; col++)
       {
-        for (int z = 0; z < Rows; z++)
+        for (int row = 0; row < Rows; row++)
         {
-          Vector2 local = transform.TransformPoint(w, z, 0);
+          Vector2 local = transform.TransformPoint(col, row, 0);
           Vector3 position = new Vector3(
               local.x * ItemWidth - WallWidth * 0.5f,
               local.y * ItemHeight - WallHeight * 0.5f,
@@ -99,10 +108,11 @@ public class BrickWallGenerator : MonoBehaviour
     Color meshColor;
     Renderer sample;
     Mesh mesh;
-    var indexedPositions = CalculatePositions().Select((position, index) => (index, position));
 
-    foreach (var (index, position) in indexedPositions)
+    for (int index = 0; index < Positions.Count; index++)
     {
+      Vector3 position = Positions[index];
+
       sample = BrickPrefabs[index % BrickPrefabs.Length];
       if (!sample) continue;
 
@@ -113,5 +123,6 @@ public class BrickWallGenerator : MonoBehaviour
       Gizmos.color = meshColor;
       Gizmos.DrawWireMesh(mesh, position, sample.transform.rotation, sample.transform.localScale);
     }
+
   }
 }

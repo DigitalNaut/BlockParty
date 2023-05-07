@@ -1,21 +1,22 @@
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
 
 [RequireComponent(typeof(Breakable))]
 public class Explosive : MonoBehaviour
 {
+  [Header("Settings")]
   [Range(0.1f, 4f)] public float scale = 1f;
   [Range(1, 32)] public int divisions = 8;
 
+  [Foldout("Events")] UnityEvent<Explosive> OnExplode;
+
   Breakable breakable;
   Vector3[] angles;
-  UnityEvent OnExplode = new UnityEvent();
 
-  void Awake()
-  {
-    OnExplode = new UnityEvent();
-    breakable = GetComponent<Breakable>();
-  }
+  void Awake() => breakable = GetComponent<Breakable>();
+
+  void Start() => OnExplode ??= new UnityEvent<Explosive>();
 
   void OnEnable()
   {
@@ -42,7 +43,7 @@ public class Explosive : MonoBehaviour
     return angles;
   }
 
-  void Explode()
+  void Explode(Breakable breakable)
   {
     var hits = new RaycastHit[16];
 
@@ -52,12 +53,12 @@ public class Explosive : MonoBehaviour
 
       foreach (var hit in hits)
       {
-        if (hit.collider && hit.collider.TryGetComponent(out Breakable breakable))
-          breakable.Break(Random.Range(0.1f, 0.25f));
+        if (hit.collider && hit.collider.TryGetComponent(out Breakable other))
+          other.Break(Random.Range(0.1f, 0.25f));
       }
     }
 
-    OnExplode?.Invoke();
+    OnExplode?.Invoke(this);
   }
 
   void OnDrawGizmosSelected()

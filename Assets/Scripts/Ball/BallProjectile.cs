@@ -1,18 +1,11 @@
 ﻿using System;
+using NaughtyAttributes;
 using UnityEngine;
-using UnityEngine.VFX;
 
 public class BallProjectile : MonoBehaviour
 {
   [Header("Properties")]
-  public float MinSpeed = 1.0f;
-  public float MaxSpeed = Mathf.Infinity;
-
-  [Range(0f, 5f)]
-  public float SpeedModifier = 0.1f;
-  [Header("References")]
-  public VisualEffect DestroyEffect;
-  public VisualEffect BallSwapEffect;
+  [SerializeField][MinMaxSlider(0.0f, 100.0f)] Vector2 speedLimits = new Vector2(1f, 20f);
 
   new Rigidbody rigidbody;
   AudioSource audioSource;
@@ -23,7 +16,7 @@ public class BallProjectile : MonoBehaviour
   float Speed
   {
     get { return rigidbody.velocity.magnitude; }
-    set { rigidbody.velocity = rigidbody.velocity.normalized * value; }
+    set { rigidbody.velocity = rigidbody.velocity.normalized * Math.Clamp(value, speedLimits.x, speedLimits.y); }
   }
 
   public enum BoosterMode
@@ -33,17 +26,13 @@ public class BallProjectile : MonoBehaviour
     KeepFastest,
   }
 
-  public void SetKinematic(bool isKinematic)
-  {
-    rigidbody.isKinematic = isKinematic;
-    speedModulator = isKinematic ? null : ManageSpeed;
-  }
+  public void SetKinematic(bool isKinematic) => rigidbody.isKinematic = isKinematic;
 
   void Awake()
   {
     rigidbody = GetComponent<Rigidbody>();
     audioSource = GetComponent<AudioSource>();
-    
+
     SetKinematic(false);
   }
 
@@ -55,37 +44,11 @@ public class BallProjectile : MonoBehaviour
       audioSource.Play();
   }
 
-  void ManageSpeed()
-  {
-    if (rigidbody.isKinematic) return;
-
-    bool isTooSlow = Speed < MinSpeed;
-    bool isSpeeding = Speed > MaxSpeed;
-    bool isOutsideOfBounds = isTooSlow || isSpeeding;
-
-    if (isOutsideOfBounds)
-    {
-      // Find which bound is breaking and assign a target speed
-      float resolvedPeed = isSpeeding ? MaxSpeed : isTooSlow ? MinSpeed : Speed;
-
-      Speed = Mathf.Lerp(Speed, resolvedPeed, SpeedModifier * Time.deltaTime);
-    }
-  }
-
-  void FixedUpdate() => speedModulator?.Invoke();
-
   void OnDisable() => StopAllCoroutines();
 
   public void DestroyProjectile()
   {
     StopAllCoroutines();
-
-    if (DestroyEffect)
-    {
-      DestroyEffect.transform.parent = null;
-      DestroyEffect.transform.position = transform.position;
-      DestroyEffect.SendEvent("PlayBurst");
-    }
 
     // Call back if it's the main ball registered by the BallManager
     if (OnDestroyCallback != null)
@@ -97,26 +60,13 @@ public class BallProjectile : MonoBehaviour
     else Destroy(gameObject);
   }
 
-  public void PlaySwapEffect()
-  {
-    if (BallSwapEffect)
-    {
-      BallSwapEffect.transform.parent = null;
-      BallSwapEffect.transform.position = transform.position;
-      BallSwapEffect.SendEvent("PlayBurst");
-    }
-  }
-
   public void Launch(Vector3 launchVelocity, BoosterMode mode = BoosterMode.Absolute, float modifier = 1.0f)
   {
-    if (rigidbody == null)
-      return;
-
     rigidbody.velocity = launchVelocity.normalized;
-    Boost(launchVelocity.magnitude, mode, modifier);
+    Modify(launchVelocity.magnitude, mode, modifier);
   }
 
-  public void Boost(float launchVelocity, BoosterMode mode = BoosterMode.Absolute, float modifier = 1.0f)
+  public void Modify(float launchVelocity, BoosterMode mode = BoosterMode.Absolute, float modifier = 1.0f)
   {
     float newVelocity = Speed * modifier + launchVelocity;
 
@@ -126,15 +76,6 @@ public class BallProjectile : MonoBehaviour
       BoosterMode.KeepFastest => Math.Max(Speed, newVelocity),
       _ => newVelocity,
     };
-  }
-
-  public void Bump(float boostSpeed, float modifier = 1.0f)
-  {
-    Vector3 rbVel = rigidbody.velocity;
-
-    float newVelocity = rbVel.magnitude * modifier + boostSpeed;
-
-    Speed = newVelocity;
   }
 
   internal void SetDirection(Vector3 newDirection) => rigidbody.velocity = newDirection.normalized * Speed;

@@ -2,9 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+using NaughtyAttributes;
+using UnityEditor;
 
-[RequireComponent(typeof(AudioSource))]
-[RequireComponent(typeof(PlayerInput))]
+[Icon("Assets/Textures/Icons/YellowBallCog.png")]
 public class BallManager : MonoBehaviour
 {
   [Header("Volley")]
@@ -12,44 +14,58 @@ public class BallManager : MonoBehaviour
   [SerializeField][Range(0f, 1f)] float VolleyOffsetDistance = 0.5f;
 
   [Header("Prefabs")]
-  [SerializeField] Transform Paddle;
+  [Required][SerializeField] Transform Paddle;
   [SerializeField] BallProjectile[] BallPrefabs;
 
-  PlayerInput playerInput;
-  Coroutine dispenseRoutine;
+  [Header("Dependencies")]
+  [Required][SerializeField] AudioSource AudioSource;
+
+  [Header("VFX")]
+  [Required][SerializeField][Expandable] VFXEvent foulBallVFXEvent;
+
+  [Foldout("Events")] public UnityEvent<int> OnBallDispensed;
+  [Foldout("Events")] public UnityEvent OnBallVolleyed;
+  [Foldout("Events")] public UnityEvent<int> OnBallDestroyed;
+  [Foldout("Events")] public UnityEvent OnAllBallsDestroyed;
+  [Foldout("Events")] public UnityEvent OnBallQueueEmpty;
+
+  [Header("Debug")]
+  [ValidateInput("ValidatePath")]
+  [SerializeField] string BallPrefabsPath = "Resources/Balls";
+  [ShowIf("isNotPlaying")]
+  [ExecuteInEditMode][Button] void EmptyBallPrefabs() => BallPrefabs = new BallProjectile[0];
+  [ShowIf("isNotPlaying")]
+  [ExecuteInEditMode]
+  [Button]
+  void ResetBallPrefabs()
+  {
+    BallPrefabs = Resources.LoadAll<BallProjectile>("Resources/Balls");
+    Debug.Log($"Loaded {BallPrefabs.Length} ball prefabs.");
+  }
+
+  bool ValidatePath(string path) => Resources.LoadAll<BallProjectile>(path).Length > 0;
+  bool isNotPlaying => !(Application.isPlaying && EditorApplication.isPlaying);
+
   BallProjectile ballOnPaddle;
+  Coroutine dispenseRoutine;
   Queue<BallProjectile> BallQueue = new Queue<BallProjectile>();
-  BallsHolster activeBalls;
+  ItemsHolster<BallProjectile> activeBalls;
+  VFXEvent foulBallVFX;
 
   Vector3 PositionOnPaddle => Paddle.position + Vector3.up * VolleyOffsetDistance;
-  public AudioSource AudioSource { get; private set; }
 
   void Awake()
   {
-    AudioSource = GetComponent<AudioSource>();
-    playerInput = GetComponent<PlayerInput>();
+    Debug.Assert(BallPrefabs.Length > 0, "BallPrefabs is empty");
 
-    Debug.Assert(Paddle != null, "Paddle not set.", transform);
-    Debug.Assert(BallPrefabs != null && BallPrefabs.Length > 0, "No ball prefabs set.", transform);
+    foulBallVFX = Instantiate(foulBallVFXEvent);
 
-    activeBalls = gameObject.AddComponent<BallsHolster>();
+    activeBalls = new ItemsHolster<BallProjectile>();
 
     InitBallQueue();
   }
 
   void Start() => DispenseNextBall();
-
-  void OnEnable()
-  {
-    playerInput.onDispenseBall.AddListener(DispenseBallHandler);
-    playerInput.onVolleyBall.AddListener(VolleyBallHandler);
-  }
-
-  void OnDisable()
-  {
-    playerInput.onDispenseBall.RemoveListener(DispenseBallHandler);
-    playerInput.onVolleyBall.RemoveListener(VolleyBallHandler);
-  }
 
   void OnDestroy() => StopAllCoroutines();
 
@@ -63,15 +79,28 @@ public class BallManager : MonoBehaviour
     }
   }
 
-  public void BallDestroyedCallback(BallProjectile target)
+  public void BallDestroyedCallback(BallProjectile ball)
   {
-    target.transform.gameObject.SetActive(false);
-    activeBalls.RemoveBall(target);
+    ball.transform.gameObject.SetActive(false);
+    activeBalls.Remove(ball);
+
+    StartCoroutine(foulBallVFX.PlayEffectAtPosition(ball.transform.position));
+
+    OnBallDestroyed?.Invoke(activeBalls.Count);
+
+    if (activeBalls.Count == 0)
+      OnAllBallsDestroyed?.Invoke();
   }
 
-  public void VolleyBall(BallProjectile ball, Vector3 vector)
+  public void VolleyBallOnPaddle(Vector3 vector)
   {
-    TakeBallOffPaddle();
+    var ball = TakeBallOffPaddle();
+
+    if (ball == null)
+    {
+      Debug.LogWarning("No ball on paddle.");
+      return;
+    }
 
     // Set ball properties
     ball.GetComponent<Rigidbody>().useGravity = true;
@@ -82,7 +111,9 @@ public class BallManager : MonoBehaviour
     ball.Launch(vector);
 
     // Add it to the active balls list
-    activeBalls.AddBall(ball);
+    activeBalls.Add(ball);
+
+    OnBallVolleyed?.Invoke();
   }
 
   IEnumerator DispenseBall(BallProjectile ball, float delay)
@@ -98,11 +129,17 @@ public class BallManager : MonoBehaviour
     ball.GetComponent<Rigidbody>().useGravity = false;
     ball.GetComponent<Collider>().enabled = false;
     ball.gameObject.SetActive(true);
+    ball.transform.parent = null;
     ball.OnDestroyCallback += BallDestroyedCallback;
 
     PutBallOnPaddle(ball);
 
     dispenseRoutine = null;
+
+    if (BallQueue.Count == 0)
+      OnBallQueueEmpty?.Invoke();
+
+    OnBallDispensed?.Invoke(BallQueue.Count);
   }
 
   public BallProjectile DispenseNextBall(float delay = 0f, bool reuseBall = false)
@@ -113,7 +150,7 @@ public class BallManager : MonoBehaviour
       return null;
     }
 
-    if (!activeBalls.CanAddBalls)
+    if (!activeBalls.CanAddItems)
     {
       Debug.LogWarning("No more balls allowed.");
       return null;
@@ -133,26 +170,41 @@ public class BallManager : MonoBehaviour
     ball.transform.position = PositionOnPaddle;
     ball.SetKinematic(true);
 
+    ToggleFX(ball, false);
+
     ballOnPaddle = ball;
+  }
+
+  void ToggleFX(BallProjectile ball, bool isActive)
+  {
+    foreach (var trail in ball.GetComponentsInChildren<TrailRenderer>(isActive))
+    {
+      trail.Clear();
+      trail.gameObject.SetActive(isActive);
+    }
+    foreach (var particleSystem in ball.GetComponentsInChildren<ParticleSystem>(isActive))
+    {
+      particleSystem.Clear();
+      particleSystem.gameObject.SetActive(isActive);
+    }
   }
 
   BallProjectile TakeBallOffPaddle()
   {
     if (ballOnPaddle == null)
-    {
-      Debug.LogWarning("No ball on paddle.");
       return null;
-    }
 
     var ball = ballOnPaddle;
     ballOnPaddle = null;
     ball.transform.parent = null;
     ball.SetKinematic(false);
 
+    ToggleFX(ball, true);
+
     return ball;
   }
 
-  void DispenseBallHandler()
+  public void DispenseBallHandler()
   {
     if (dispenseRoutine == null)
     {
@@ -162,18 +214,7 @@ public class BallManager : MonoBehaviour
     else Debug.Log("Dispense already in progress");
   }
 
-  void VolleyBallHandler()
-  {
-    if (ballOnPaddle == null)
-    {
-      Debug.Log("No ball on paddle.");
-      return;
-    }
-
-    var ball = TakeBallOffPaddle();
-
-    VolleyBall(ball, Vector3.up * VolleyThrustSpeed);
-  }
+  public void VolleyBallHandler() => VolleyBallOnPaddle(Vector3.up * VolleyThrustSpeed);
 
   void OnDrawGizmosSelected()
   {

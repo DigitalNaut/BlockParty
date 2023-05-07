@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
+[Icon("Assets/Textures/Icons/Joystick.png")]
 [RequireComponent(typeof(Rigidbody))]
 public class PaddleController : MonoBehaviour
 {
@@ -11,6 +12,9 @@ public class PaddleController : MonoBehaviour
   Mouse currentMouse;
   private Vector2 previousMousePosition;
 
+  delegate void OnMouseMoved();
+  OnMouseMoved onMouseMoved;
+
   private void Awake()
   {
     rigidbody = GetComponent<Rigidbody>();
@@ -18,7 +22,11 @@ public class PaddleController : MonoBehaviour
     currentMouse = Mouse.current;
   }
 
-  private void FixedUpdate() => TrackMouse();
+  void OnEnable() => onMouseMoved = TrackMouse;
+
+  void OnDisable() => onMouseMoved = null;
+
+  private void FixedUpdate() => onMouseMoved();
 
   private void TrackMouse()
   {
