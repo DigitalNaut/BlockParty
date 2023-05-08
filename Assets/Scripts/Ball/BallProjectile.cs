@@ -1,7 +1,9 @@
 ﻿using System;
 using NaughtyAttributes;
 using UnityEngine;
+using UnityEngine.Events;
 
+[Icon("Assets/Textures/Icons/ProjectileWithTrail.png")]
 public class BallProjectile : MonoBehaviour
 {
   [Header("Properties")]
@@ -11,7 +13,7 @@ public class BallProjectile : MonoBehaviour
   AudioSource audioSource;
   Action speedModulator;
 
-  public Action<BallProjectile> OnDestroyCallback;
+  public UnityEvent<BallProjectile> OnDestroyCallback;
 
   float Speed
   {
@@ -44,20 +46,18 @@ public class BallProjectile : MonoBehaviour
       audioSource.Play();
   }
 
-  void OnDisable() => StopAllCoroutines();
+  void OnDestroy()
+  {
+    StopAllCoroutines();
+    OnDestroyCallback.RemoveAllListeners();
+  }
 
   public void DestroyProjectile()
   {
-    StopAllCoroutines();
+    rigidbody.velocity = Vector3.zero;
+    OnDestroyCallback?.Invoke(this);
 
-    // Call back if it's the main ball registered by the BallManager
-    if (OnDestroyCallback != null)
-    {
-      rigidbody.velocity = Vector3.zero; // Bugfix: stops VFX from inheriting death velocity on respawn
-      OnDestroyCallback.Invoke(this);
-    }
-    // Otherwise, disable
-    else Destroy(gameObject);
+    Destroy(gameObject);
   }
 
   public void Launch(Vector3 launchVelocity, BoosterMode mode = BoosterMode.Absolute, float modifier = 1.0f)

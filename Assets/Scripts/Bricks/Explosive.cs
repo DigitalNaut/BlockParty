@@ -2,6 +2,8 @@ using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
 
+[Icon("Assets/Textures/Icons/Explosive.png")]
+
 [RequireComponent(typeof(Breakable))]
 public class Explosive : MonoBehaviour
 {
@@ -43,7 +45,7 @@ public class Explosive : MonoBehaviour
     return angles;
   }
 
-  void Explode(Breakable breakable)
+  void Explode(Breakable breakable, Collision collision)
   {
     var hits = new RaycastHit[16];
 
@@ -54,7 +56,7 @@ public class Explosive : MonoBehaviour
       foreach (var hit in hits)
       {
         if (hit.collider && hit.collider.TryGetComponent(out Breakable other))
-          other.Break(Random.Range(0.1f, 0.25f));
+          other.Break(null, Random.Range(0.1f, 0.25f));
       }
     }
 

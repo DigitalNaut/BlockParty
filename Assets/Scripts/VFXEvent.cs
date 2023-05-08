@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.VFX;
@@ -14,32 +15,30 @@ public class VFXEvent : ScriptableObject
 
   [Tooltip("The delay before playing the Visual Effect.")]
   public float delay = 0.4f;
-
-  VisualEffect VFX;
-
-  void Awake()
-  {
-    if (VFXPrefab != null)
-    {
-      VFX = Instantiate(VFXPrefab).GetComponent<VisualEffect>();
-      VFX.gameObject.SetActive(true);
-    }
-  }
+  [Tooltip("The duration of the Visual Effect.")]
+  public float duration = 1f;
 
   /// <summary>
   /// Plays the Visual Effect at the specified position.
   /// </summary>
-  public IEnumerator PlayEffectAtPosition(Vector3 position, Vector3? scale = null)
+  public IEnumerator Play(Vector3 position, float? differentDelay = null, Vector3? differentScale = null)
   {
-    yield return new WaitForSeconds(delay);
+    yield return new WaitForSeconds(differentDelay ?? delay);
 
-    if (VFX == null)
-      yield break;
+    PlayEffect(position, differentScale);
+  }
+
+  void PlayEffect(Vector3 position, Vector3? scale = null)
+  {
+    var VFX = Instantiate(VFXPrefab, null).AddComponent<Timer>();
 
     VFX.transform.parent = null;
     VFX.transform.position = position;
     if (scale != null) VFX.transform.localScale = (Vector3)scale;
 
-    VFX.SendEvent(VFXEventName);
+    if (VFX.TryGetComponent(out VisualEffect effect))
+      effect.SendEvent(VFXEventName);
+
+    VFX.Set(duration, Destroy);
   }
 }

@@ -60,6 +60,7 @@
         "lerp",
         "Lerp",
         "Mathf",
+        "Pooler",
         "raycast",
         "Raycast",
         "raycasting",

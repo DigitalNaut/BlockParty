@@ -7,8 +7,8 @@ using NaughtyAttributes;
 /// </summary>
 
 // Set script icon
-[AddComponentMenu("Scripts/Ball/LucidBallManager")]
 [Icon("Assets/Textures/Icons/PurpleBallCog.png")]
+[AddComponentMenu("Scripts/Ball/LucidBallManager")]
 [RequireComponent(typeof(BallManager))]
 public class LucidBallManager : MonoBehaviour
 {
@@ -19,9 +19,10 @@ public class LucidBallManager : MonoBehaviour
   [Required][SerializeField] AudioSource AudioSource;
 
   [Header("VFX")]
-  [Required][SerializeField][Expandable] VFXEvent implodeVFXEvent;
-  [Required][SerializeField][Expandable] VFXEvent explodeVFXEvent;
-  [Required][SerializeField][Expandable] VFXEvent foulBallVFXEvent;
+  [Required][SerializeField][Expandable] VFXEvent implodeVFXPrefab;
+  [Required][SerializeField][Expandable] VFXEvent explodeVFXPrefab;
+  [Required][SerializeField][Expandable] VFXEvent foulBallVFXPrefab;
+  [Required][SerializeField][Expandable] VFXEvent victoryBurstVFXPrefab;
 
   [Header("SFX")]
   [Required][SerializeField] AudioClip BallUpgradeSound;
@@ -29,13 +30,15 @@ public class LucidBallManager : MonoBehaviour
   VFXEvent implodeVFX;
   VFXEvent explodeVFX;
   VFXEvent foulBallVFX;
+  VFXEvent victoryBurstVFX;
   ItemsHolster<BallProjectile> ballsHolster;
 
   void Awake()
   {
-    implodeVFX = Instantiate(implodeVFXEvent);
-    explodeVFX = Instantiate(explodeVFXEvent);
-    foulBallVFX = Instantiate(foulBallVFXEvent);
+    implodeVFX = Instantiate(implodeVFXPrefab);
+    explodeVFX = Instantiate(explodeVFXPrefab);
+    foulBallVFX = Instantiate(foulBallVFXPrefab);
+    victoryBurstVFX = Instantiate(victoryBurstVFXPrefab);
 
     ballsHolster = new ItemsHolster<BallProjectile>();
     ballsHolster.SetMaxLimit(5);
@@ -48,16 +51,15 @@ public class LucidBallManager : MonoBehaviour
     var newBall = Instantiate(LucidBallPrefab, parent);
     newBall.gameObject.SetActive(isActive);
     newBall.SetKinematic(false);
-    newBall.OnDestroyCallback += BallDestroyedCallback;
-
-    newBall.OnDestroyCallback += ballsHolster.Remove;
+    newBall.OnDestroyCallback.AddListener(BallDestroyedCallback);
 
     return newBall;
   }
 
   public void BallDestroyedCallback(BallProjectile ball)
   {
-    StartCoroutine(foulBallVFX.PlayEffectAtPosition(ball.transform.position));
+    ballsHolster.Remove(ball);
+    StartCoroutine(foulBallVFX.Play(ball.transform.position));
   }
 
   public void SpawnLucidBall(Transform spawner, Collision collision)
@@ -67,23 +69,42 @@ public class LucidBallManager : MonoBehaviour
 
     // Set the lucid ball's position and velocity
     newLucidBall.transform.position = spawner.position;
-    if (collision.rigidbody != null)
+    if (collision?.rigidbody != null)
       newLucidBall.GetComponent<Rigidbody>().velocity = collision.rigidbody.velocity;
 
     // Show lucid ball after VFX
     IEnumerator Animate()
     {
-      yield return PlaySpawnVFX(spawner.position);
-      newLucidBall.gameObject.SetActive(true);
+      yield return PlaySpawnVFXSequence(spawner.position);
+      if (newLucidBall)
+        newLucidBall.gameObject.SetActive(true);
     }
 
     StartCoroutine(Animate());
   }
 
-  IEnumerator PlaySpawnVFX(Vector3 position)
+  void DestroyBall(BallProjectile ball)
   {
-    Debug.DrawLine(transform.position, position, Color.green, 1f);
-    yield return StartCoroutine(explodeVFX.PlayEffectAtPosition(position));
-    yield return StartCoroutine(implodeVFX.PlayEffectAtPosition(position));
+    ballsHolster.Remove(ball);
+    Destroy(ball.gameObject);
+  }
+
+  void DestroyAllActiveBalls() => ballsHolster.Clear((ball) => ball.gameObject.activeSelf);
+
+  public void VictoryBurst()
+  {
+    ballsHolster.ForEach(ball =>
+    {
+      if (ball.gameObject.activeSelf)
+        StartCoroutine(victoryBurstVFX.Play(ball.transform.position));
+    });
+
+    DestroyAllActiveBalls();
+  }
+
+  IEnumerator PlaySpawnVFXSequence(Vector3 position)
+  {
+    yield return explodeVFX.Play(position);
+    yield return implodeVFX.Play(position);
   }
 }

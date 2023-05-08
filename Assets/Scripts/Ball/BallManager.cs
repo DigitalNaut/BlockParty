@@ -9,7 +9,7 @@ using UnityEditor;
 [Icon("Assets/Textures/Icons/YellowBallCog.png")]
 public class BallManager : MonoBehaviour
 {
-  [Header("Volley")]
+  [Header("Settings")]
   [SerializeField][Range(0.1f, 30f)] float VolleyThrustSpeed = 15f;
   [SerializeField][Range(0f, 1f)] float VolleyOffsetDistance = 0.5f;
 
@@ -21,7 +21,8 @@ public class BallManager : MonoBehaviour
   [Required][SerializeField] AudioSource AudioSource;
 
   [Header("VFX")]
-  [Required][SerializeField][Expandable] VFXEvent foulBallVFXEvent;
+  [Required][SerializeField][Expandable] VFXEvent foulBallVFXPrefab;
+  [Required][SerializeField][Expandable] VFXEvent victoryBurstVFXPrefab;
 
   [Foldout("Events")] public UnityEvent<int> OnBallDispensed;
   [Foldout("Events")] public UnityEvent OnBallVolleyed;
@@ -29,28 +30,15 @@ public class BallManager : MonoBehaviour
   [Foldout("Events")] public UnityEvent OnAllBallsDestroyed;
   [Foldout("Events")] public UnityEvent OnBallQueueEmpty;
 
-  [Header("Debug")]
-  [ValidateInput("ValidatePath")]
-  [SerializeField] string BallPrefabsPath = "Resources/Balls";
-  [ShowIf("isNotPlaying")]
-  [ExecuteInEditMode][Button] void EmptyBallPrefabs() => BallPrefabs = new BallProjectile[0];
-  [ShowIf("isNotPlaying")]
-  [ExecuteInEditMode]
-  [Button]
-  void ResetBallPrefabs()
-  {
-    BallPrefabs = Resources.LoadAll<BallProjectile>("Resources/Balls");
-    Debug.Log($"Loaded {BallPrefabs.Length} ball prefabs.");
-  }
+  [ShowIf("IsNotPlaying")][ExecuteInEditMode][Button] void EmptyBallPrefabs() => BallPrefabs = new BallProjectile[0];
+  bool IsNotPlaying() => !EditorApplication.isPlaying;
 
-  bool ValidatePath(string path) => Resources.LoadAll<BallProjectile>(path).Length > 0;
-  bool isNotPlaying => !(Application.isPlaying && EditorApplication.isPlaying);
-
+  VFXEvent foulBallVFX;
+  VFXEvent victoryBurstVFX;
   BallProjectile ballOnPaddle;
   Coroutine dispenseRoutine;
   Queue<BallProjectile> BallQueue = new Queue<BallProjectile>();
   ItemsHolster<BallProjectile> activeBalls;
-  VFXEvent foulBallVFX;
 
   Vector3 PositionOnPaddle => Paddle.position + Vector3.up * VolleyOffsetDistance;
 
@@ -58,16 +46,24 @@ public class BallManager : MonoBehaviour
   {
     Debug.Assert(BallPrefabs.Length > 0, "BallPrefabs is empty");
 
-    foulBallVFX = Instantiate(foulBallVFXEvent);
+    foulBallVFX = Instantiate(foulBallVFXPrefab);
+    victoryBurstVFX = Instantiate(victoryBurstVFXPrefab);
 
     activeBalls = new ItemsHolster<BallProjectile>();
 
     InitBallQueue();
   }
 
-  void Start() => DispenseNextBall();
+  void OnDestroy()
+  {
+    OnBallDispensed.RemoveAllListeners();
+    OnBallVolleyed.RemoveAllListeners();
+    OnBallDestroyed.RemoveAllListeners();
+    OnAllBallsDestroyed.RemoveAllListeners();
+    OnBallQueueEmpty.RemoveAllListeners();
 
-  void OnDestroy() => StopAllCoroutines();
+    StopAllCoroutines();
+  }
 
   void InitBallQueue()
   {
@@ -79,17 +75,27 @@ public class BallManager : MonoBehaviour
     }
   }
 
-  public void BallDestroyedCallback(BallProjectile ball)
+  public void DestroyBall(BallProjectile ball)
   {
     ball.transform.gameObject.SetActive(false);
     activeBalls.Remove(ball);
+    Destroy(ball.gameObject);
 
-    StartCoroutine(foulBallVFX.PlayEffectAtPosition(ball.transform.position));
+    StartCoroutine(foulBallVFX.Play(ball.transform.position));
 
     OnBallDestroyed?.Invoke(activeBalls.Count);
 
     if (activeBalls.Count == 0)
       OnAllBallsDestroyed?.Invoke();
+  }
+
+  public void DestroyAllActiveBalls() => activeBalls.Clear();
+
+  public void VictoryBurst()
+  {
+    activeBalls.ForEach(ball => StartCoroutine(victoryBurstVFX.Play(ball.transform.position)));
+
+    DestroyAllActiveBalls();
   }
 
   public void VolleyBallOnPaddle(Vector3 vector)
@@ -130,7 +136,7 @@ public class BallManager : MonoBehaviour
     ball.GetComponent<Collider>().enabled = false;
     ball.gameObject.SetActive(true);
     ball.transform.parent = null;
-    ball.OnDestroyCallback += BallDestroyedCallback;
+    ball.OnDestroyCallback.AddListener(DestroyBall);
 
     PutBallOnPaddle(ball);
 

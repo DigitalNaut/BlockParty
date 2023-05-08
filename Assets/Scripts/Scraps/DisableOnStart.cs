@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
 
+[Icon("Assets/Textures/Icons/PlayCrossedOut.png")]
 public class DisableOnStart : MonoBehaviour
 {
-  // Start is called before the first frame update
-  void Start()
-  {
-    transform.gameObject.SetActive(false);
-  }
+  void Start() => transform.gameObject.SetActive(false);
 }

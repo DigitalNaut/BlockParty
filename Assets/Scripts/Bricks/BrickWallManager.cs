@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
 
 [Icon("Assets/Textures/Icons/BrickWallCogs.png")]
-public class BrickManager : MonoBehaviour
+public class BrickWallManager : MonoBehaviour
 {
   [Header("Dependencies")]
   [Required][SerializeField] BrickWallGenerator brickWallGenerator;
@@ -13,37 +14,42 @@ public class BrickManager : MonoBehaviour
   [Foldout("Events")] public UnityEvent OnAllBricksDestroyed;
   [Foldout("Events")] public UnityEvent<int> OnBricksCountChanged;
 
-  List<Breakable> breakables;
+  public List<Breakable> Breakables { get; private set; }
+
+  public BrickWallGenerator GetBrickWallGenerator() => brickWallGenerator;
 
   public void SetBrickWallGenerator(BrickWallGenerator newBrickWallGenerator) => brickWallGenerator = newBrickWallGenerator;
 
-  void Start() => Generate();
-
-  void Generate()
+  public List<Breakable> Generate(Action<Breakable> onBreakableCreated = null)
   {
     var newBreakables = brickWallGenerator.BuildBreakablesWall();
     breakableRemover.ClearOverlappingBreakables(newBreakables);
-    SetBreakables(newBreakables);
+    return SetBreakables(newBreakables, onBreakableCreated);
   }
 
-  public void SetBreakables(List<Breakable> newBreakables)
+  public List<Breakable> SetBreakables(List<Breakable> newBreakables, Action<Breakable> onBreakableCreated = null)
   {
-    breakables = newBreakables;
+    Breakables = newBreakables;
 
-    foreach (var breakable in breakables)
+    foreach (var breakable in Breakables)
+    {
       breakable.OnBreak.AddListener(BreakableDestroyed);
+      onBreakableCreated?.Invoke(breakable);
+    }
 
-    OnBricksCountChanged?.Invoke(breakables.Count);
+    OnBricksCountChanged?.Invoke(Breakables.Count);
+
+    return Breakables;
   }
 
-  void BreakableDestroyed(Breakable breakable)
+  void BreakableDestroyed(Breakable breakable, Collision collision)
   {
-    breakables.Remove(breakable);
+    Breakables.Remove(breakable);
 
-    if (breakables.Count == 0)
+    if (Breakables.Count == 0)
       OnAllBricksDestroyed?.Invoke();
 
-    OnBricksCountChanged?.Invoke(breakables.Count);
+    OnBricksCountChanged?.Invoke(Breakables.Count);
   }
 
   void OnDrawGizmosSelected()

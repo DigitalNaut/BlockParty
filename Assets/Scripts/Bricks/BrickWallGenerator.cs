@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using NaughtyAttributes;
 using UnityEngine;
 
-[Icon("Assets/Textures/Icons/TrowelBrickWallIcon.png")]
+[Icon("Assets/Textures/Icons/TrowelBrickWall.png")]
 public class BrickWallGenerator : MonoBehaviour
 {
   [Header("Prefabs")]
@@ -14,16 +13,27 @@ public class BrickWallGenerator : MonoBehaviour
   [SerializeField] int Columns = 16;
   [OnValueChanged("CalculatePositions")]
   [SerializeField] int Rows = 9;
+  [OnValueChanged("CalculatePositions")]
   [SerializeField] Vector2 Padding = new Vector2(0.6f, 0.6f);
 
   [Header("Debug")]
+  [SerializeField] bool debug = false;
   [ReadOnly] public List<Vector3> Positions;
   [Button("Make Brick Manager's Wall Generator", EButtonEnableMode.Editor)]
+  [DisableIf("IsBrickManagerWallGenerator")]
   void MakeBrickManagerWallGenerator()
   {
-    var brickManager = FindObjectOfType<BrickManager>();
-    if (brickManager) brickManager.SetBrickWallGenerator(this);
+    if (brickManager)
+    {
+      gameObject.SetActive(true);
+      brickManager.SetBrickWallGenerator(this);
+    }
+    else Debug.LogWarning("No Brick Manager found in scene");
   }
+  bool IsBrickManagerWallGenerator() => brickManager.GetBrickWallGenerator() == this;
+
+  BrickWallManager brickManager;
+  Debugger debugger;
 
   float ItemWidth { get => BrickPrefabs.Length > 0 && !!BrickPrefabs[0] ? BrickPrefabs[0].bounds.size.x + Padding.x : 0; }
   float ItemHeight { get => BrickPrefabs.Length > 0 && !!BrickPrefabs[0] ? BrickPrefabs[0].bounds.size.y + Padding.y : 0; }
@@ -32,6 +42,12 @@ public class BrickWallGenerator : MonoBehaviour
   float WallHeight { get => ItemHeight * (Rows - 1); }
 
   void Awake() => Debug.Assert(BrickPrefabs.Length > 0, "BrickPrefabs is empty");
+
+  void OnValidate()
+  {
+    brickManager = FindObjectOfType<BrickWallManager>();
+    if (debug) debugger = new Debugger();
+  }
 
   void CalculatePositions() => Positions = CalculateGrid();
 
@@ -49,7 +65,7 @@ public class BrickWallGenerator : MonoBehaviour
     foreach (var position in Positions)
     {
       newBrick = GetRandomBrick();
-      newBrick.transform.position = position;
+      newBrick.transform.position = transform.TransformPoint(position);
       newBrick.transform.SetParent(transform);
       newBrick.SetActive(true);
 
@@ -57,15 +73,14 @@ public class BrickWallGenerator : MonoBehaviour
       if (newBreakable) newBreakables.Add(newBreakable);
     }
 
-    Debug.Log($"Built {newBreakables.Count} Breakables");
+    if (debug) debugger.LogBrickCount(newBreakables.Count);
 
     return newBreakables;
   }
 
+  [Button("Recalculate Grid")]
   List<Vector3> CalculateGrid()
   {
-    Debug.Log("Calculating Grid");
-
     var positionsList = new List<Vector3>();
 
     if (BrickPrefabs.Length > 0)
@@ -74,7 +89,7 @@ public class BrickWallGenerator : MonoBehaviour
       {
         for (int row = 0; row < Rows; row++)
         {
-          Vector2 local = transform.TransformPoint(col, row, 0);
+          Vector2 local = new Vector3(col, row, 0);
           Vector3 position = new Vector3(
               local.x * ItemWidth - WallWidth * 0.5f,
               local.y * ItemHeight - WallHeight * 0.5f,
@@ -85,13 +100,14 @@ public class BrickWallGenerator : MonoBehaviour
       }
     }
 
+    if (debug) debugger.LogGeneration(positionsList.Count);
+
     return positionsList;
   }
 
   GameObject GetRandomBrick()
   {
     int randInt = Random.Range(0, BrickPrefabs.Length);
-
     return Instantiate(BrickPrefabs[randInt].gameObject);
   }
 
@@ -121,8 +137,14 @@ public class BrickWallGenerator : MonoBehaviour
       meshColor.a = 0.1f;
 
       Gizmos.color = meshColor;
-      Gizmos.DrawWireMesh(mesh, position, sample.transform.rotation, sample.transform.localScale);
+      Gizmos.DrawWireMesh(mesh, transform.TransformPoint(position), sample.transform.rotation, sample.transform.localScale);
     }
+  }
 
+  class Debugger
+  {
+    public void LogGeneration(int count) => Debug.Log($"Calculated {count} positions.");
+    public void LogBrickCount(int count) => Debug.Log($"Generated {count} bricks.");
   }
 }
+

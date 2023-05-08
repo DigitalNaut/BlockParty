@@ -5,8 +5,8 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class PaddleController : MonoBehaviour
 {
-  [SerializeField] float SlideSpeed = 12f;
-  [SerializeField] float MaxSpeed = 4f;
+  [SerializeField] float SlideSpeed = 10000f;
+  [SerializeField] float MinSpeed = 4f;
   new Rigidbody rigidbody;
   Camera mainCamera;
   Mouse currentMouse;
@@ -24,7 +24,11 @@ public class PaddleController : MonoBehaviour
 
   void OnEnable() => onMouseMoved = TrackMouse;
 
-  void OnDisable() => onMouseMoved = null;
+  void OnDisable()
+  {
+    onMouseMoved = null;
+    rigidbody.velocity = Vector3.zero;
+  }
 
   private void FixedUpdate() => onMouseMoved();
 
@@ -50,6 +54,6 @@ public class PaddleController : MonoBehaviour
     var slideForce = new Vector3(distance * Time.fixedDeltaTime * SlideSpeed, 0, 0);
     rigidbody.AddForce(slideForce);
 
-    rigidbody.velocity = Vector3.ClampMagnitude(rigidbody.velocity, Mathf.Min(distance * distance, MaxSpeed));
+    rigidbody.velocity = Vector3.ClampMagnitude(rigidbody.velocity, Mathf.Min(distance * distance, MinSpeed));
   }
 }

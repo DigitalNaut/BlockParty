@@ -6,6 +6,7 @@ using UnityEngine;
 /// <summary>
 /// This script is used to remove any breakables that are overlapping the static obstacles.
 /// </summary>
+[Icon("Assets/Textures/Icons/FragileCrossedOut.png")]
 public class BreakableRemover : MonoBehaviour
 {
   public void ClearOverlappingBreakables(List<Breakable> breakables) => StartCoroutine(ClearOverlap(breakables));

@@ -14,21 +14,21 @@ public class Breakable : MonoBehaviour
   [Header("Settings")]
   [SerializeField] string BreakEffectEventName = "PlayBurst";
 
-  [Foldout("Events")] public UnityEvent<Breakable> OnBreak;
+  [Foldout("Events")] public UnityEvent<Breakable, Collision> OnBreak;
 
   void Awake() => Debug.Assert(string.IsNullOrEmpty(BreakEffectEventName) == false, "BreakEffectEventName is empty");
 
-  void Start() => OnBreak ??= new UnityEvent<Breakable>();
+  void Start() => OnBreak ??= new UnityEvent<Breakable, Collision>();
 
-  void OnCollisionStay(Collision collision) => Break();
+  void OnCollisionStay(Collision collision) => Break(collision);
 
-  void OnCollisionEnter(Collision collision) => Break();
+  void OnCollisionEnter(Collision collision) => Break(collision);
 
   void OnTriggerEnter() => Break();
 
   void OnDestroy() => OnBreak.RemoveAllListeners();
 
-  public void Break(float delay = 0)
+  public void Break(Collision collision = null, float delay = 0)
   {
     IEnumerator breakSubroutine()
     {
@@ -44,7 +44,7 @@ public class Breakable : MonoBehaviour
         Destroy(BreakEffect.gameObject, 1f);
       }
 
-      OnBreak?.Invoke(this);
+      OnBreak?.Invoke(this, collision);
 
       yield return new WaitForFixedUpdate();
 

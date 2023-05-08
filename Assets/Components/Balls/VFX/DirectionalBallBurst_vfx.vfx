@@ -17,9 +17,9 @@ MonoBehaviour:
   categories: []
   uiBounds:
     serializedVersion: 2
-    x: -252
+    x: -330
     y: -645
-    width: 951
+    width: 1029
     height: 2537
 --- !u!114 &114350483966674976
 MonoBehaviour:
@@ -31,7 +31,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7d4c867f6b72b714dbb5fd1780afe208, type: 3}
-  m_Name: FoulBall_vfx
+  m_Name: DirectionalBallBurst_vfx
   m_EditorClassIdentifier: 
   m_UIIgnoredErrors: []
   m_Parent: {fileID: 0}
@@ -223,7 +223,7 @@ VisualEffectResource:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: FoulBall_vfx
+  m_Name: DirectionalBallBurst_vfx
   m_Graph: {fileID: 114350483966674976}
   m_Infos:
     m_RendererSettings:
@@ -3073,9 +3073,9 @@ MonoBehaviour:
       inputSlot: {fileID: 8926484042661614753}
     - outputSlot: {fileID: 8926484042661614987}
       inputSlot: {fileID: 8926484042661614758}
-    position: {x: -102, y: 183}
+    position: {x: -165, y: 131}
     expandedSlots: []
-    expanded: 0
+    expanded: 1
 --- !u!114 &8926484042661614985
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3226,9 +3226,9 @@ MonoBehaviour:
       inputSlot: {fileID: 8926484042661614757}
     - outputSlot: {fileID: 8926484042661614999}
       inputSlot: {fileID: 8926484042661614759}
-    position: {x: -252, y: 387}
+    position: {x: -330, y: 368}
     expandedSlots: []
-    expanded: 0
+    expanded: 1
 --- !u!114 &8926484042661614999
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3281,7 +3281,7 @@ MonoBehaviour:
   m_UIIgnoredErrors: []
   m_Parent: {fileID: 114350483966674976}
   m_Children: []
-  m_UIPosition: {x: -11, y: 292}
+  m_UIPosition: {x: -11, y: 291}
   m_UICollapsed: 1
   m_UISuperCollapsed: 0
   m_InputSlots:
