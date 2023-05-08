@@ -2,6 +2,7 @@ using System.Linq;
 using NaughtyAttributes;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(PlayerInput))]
 [RequireComponent(typeof(AudioSource))]
@@ -10,6 +11,9 @@ public class GameManager : MonoBehaviour
   [Header("UI")]
   [Required][SerializeField] TextMeshProUGUI BallQueueText;
   [Required][SerializeField] TextMeshProUGUI bricksCountTextbox;
+  [Required][SerializeField] CanvasGroup HUD;
+  [Required][SerializeField] CanvasGroup VictoryScreen;
+  // [Required][SerializeField] CanvasGroup GameOverScreen;
 
   [Header("Dependencies")]
   [Required][SerializeField] BrickWallManager brickManager;
@@ -62,16 +66,22 @@ public class GameManager : MonoBehaviour
       case GameState.Playing:
         Debug.Log("Game started");
         ToggleControls(true);
-
         brickManager.Generate(RegisterLucidBallSpawner);
         ballManager.DispenseNextBall();
+
+        HUD.gameObject.SetActive(true);
+        VictoryScreen.gameObject.SetActive(false);
         break;
       case GameState.Victory:
         ToggleControls(false);
         VictoryHandler();
+
+        VictoryScreen.gameObject.SetActive(true);
+        HUD.gameObject.SetActive(false);
         break;
       case GameState.GameOver:
         ToggleControls(false);
+        HUD.gameObject.SetActive(false);
         break;
       default:
         Debug.LogError($"Unknown game state: {state}");
@@ -117,4 +127,6 @@ public class GameManager : MonoBehaviour
     ballManager.VictoryBurst();
     lucidBallManager.VictoryBurst();
   }
+
+  public void RestartGame() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 }
