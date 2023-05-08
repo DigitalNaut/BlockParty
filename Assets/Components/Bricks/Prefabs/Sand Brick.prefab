@@ -18,7 +18,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1696410922460156130, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: Modifier
-      value: 0.3
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 1696410922460156130, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: BounceMode
@@ -454,7 +454,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9218154161495362639, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 6
+      value: 3.9699998
       objectReference: {fileID: 0}
     - target: {fileID: 9218154161495362639, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: m_LocalPosition.y
