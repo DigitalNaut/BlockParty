@@ -15,7 +15,3 @@ While I try to keep a clear and discrete commit history, I don't always succeed 
 ### How to Contribute
 
 If you want to contribute to the project, fork the [`dev`](https://github.com/DigitalNaut/BlockParty/tree/dev) branch and make a pull request. I'll review it and merge it into the main branch if it's good. It helps if you provide a description of what you changed and why you changed it.
-
-### Disabled Unity settings that need to be restored
-
-- Baked global illumination was turned off because it was causing a render queue time of 6 hours or more for whatever reason. It needs to be turned back on.

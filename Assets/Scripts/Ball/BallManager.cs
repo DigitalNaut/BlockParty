@@ -30,8 +30,10 @@ public class BallManager : MonoBehaviour
   [Foldout("Events")] public UnityEvent OnAllBallsDestroyed;
   [Foldout("Events")] public UnityEvent OnBallQueueEmpty;
 
+#if UNITY_EDITOR
   [ShowIf("IsNotPlaying")][ExecuteInEditMode][Button] void EmptyBallPrefabs() => BallPrefabs = new BallProjectile[0];
   bool IsNotPlaying() => !EditorApplication.isPlaying;
+#endif
 
   VFXEvent foulBallVFX;
   VFXEvent victoryBurstVFX;

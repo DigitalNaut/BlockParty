@@ -21,13 +21,19 @@ public class BouncePaddle : MonoBehaviour
   Action<Collision> CollisionStrategy;
   Debugger debugger;
 
-  void Awake() => renderer = GetComponent<Renderer>();
+  void Awake()
+  {
+    SetInfluenceFunction(influenceMode);
+    renderer = GetComponent<Renderer>();
+  }
 
   void OnValidate()
   {
     SetInfluenceFunction(influenceMode);
     if (debug) debugger = new Debugger();
   }
+
+  void Start() => CollisionStrategy = InfluenceCollision;
 
   void OnEnable() => CollisionStrategy = InfluenceCollision;
   void OnDisable() => CollisionStrategy = null;
