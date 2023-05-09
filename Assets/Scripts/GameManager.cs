@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
   [Required][SerializeField] TextMeshProUGUI bricksCountTextbox;
   [Required][SerializeField] CanvasGroup HUD;
   [Required][SerializeField] CanvasGroup VictoryScreen;
-  // [Required][SerializeField] CanvasGroup GameOverScreen;
+  [Required][SerializeField] CanvasGroup GameOverScreen;
 
   [Header("Dependencies")]
   [Required][SerializeField] BrickWallManager brickManager;
@@ -48,10 +48,12 @@ public class GameManager : MonoBehaviour
   void Start()
   {
     brickManager.OnBricksCountChanged.AddListener(UpdateBricksCountTextbox);
-    brickManager.OnAllBricksDestroyed.AddListener(() => SetGameState(GameState.Victory));
+    brickManager.OnAllBricksDestroyed.AddListener(HandleVictory);
 
     ballManager.OnBallDispensed.AddListener(UpdateBallsQueueCountTextbox);
-    ballManager.OnBallQueueEmpty.AddListener(BallsQueueEmptyHandler);
+    ballManager.OnBallDestroyed.AddListener(HandleBallDestroyed);
+
+    lucidBallManager.OnAllBallsDestroyed.AddListener(HandleBallDestroyed);
 
     SetGameState(GameState.Playing);
   }
@@ -64,28 +66,33 @@ public class GameManager : MonoBehaviour
     switch (state)
     {
       case GameState.Playing:
-        Debug.Log("Game started");
         ToggleControls(true);
+
         brickManager.Generate(RegisterLucidBallSpawner);
         ballManager.DispenseNextBall();
 
         HUD.gameObject.SetActive(true);
         VictoryScreen.gameObject.SetActive(false);
+        GameOverScreen.gameObject.SetActive(false);
         break;
       case GameState.Victory:
         ToggleControls(false);
-        VictoryHandler();
+
+        ballManager.VictoryBurst();
+        lucidBallManager.VictoryBurst();
 
         VictoryScreen.gameObject.SetActive(true);
+        GameOverScreen.gameObject.SetActive(false);
         HUD.gameObject.SetActive(false);
         break;
       case GameState.GameOver:
         ToggleControls(false);
+
         HUD.gameObject.SetActive(false);
+        GameOverScreen.gameObject.SetActive(true);
         break;
       default:
-        Debug.LogError($"Unknown game state: {state}");
-        break;
+        throw new System.Exception($"Unknown game state: {state}");
     }
 
     gameState = state;
@@ -101,32 +108,25 @@ public class GameManager : MonoBehaviour
 
   void UpdateBallsQueueCountTextbox(int count) => BallQueueText.text = count > 0 ? string.Concat(Enumerable.Repeat("\uF111 ", count)) : "\uF00D";
 
-  void BallsQueueEmptyHandler() => ballManager.OnAllBallsDestroyed.AddListener(LastBallDestroyedHandler);
-
-  void LastBallDestroyedHandler()
-  {
-    if (brickManager.Breakables.Count == 0) return;
-
-    ballManager.OnAllBallsDestroyed.RemoveListener(() => SetGameState(GameState.GameOver));
-  }
-
   void RegisterLucidBallSpawner(Breakable brick)
   {
     if (brick.TryGetComponent(out LucidBallSpawner lucidBallSpawner))
-      brick.OnBreak.AddListener((breakable, collision) => SpawnLucidBallHandler(breakable.transform, collision));
+      brick.OnBreak.AddListener((breakable, collision) => HandleSpawnLucidBall(breakable.transform, collision));
   }
 
-  void SpawnLucidBallHandler(Transform spawnerTransform, Collision collision)
+  void HandleSpawnLucidBall(Transform spawnerTransform, Collision collision)
   {
     if (brickManager.Breakables.Count == 0 || collision == null) return;
     lucidBallManager.SpawnLucidBall(spawnerTransform, collision);
   }
 
-  void VictoryHandler()
+  void HandleBallDestroyed()
   {
-    ballManager.VictoryBurst();
-    lucidBallManager.VictoryBurst();
+    if (ballManager.ActiveBalls.Count == 0 && ballManager.BallQueue.Count == 0 && lucidBallManager.BallsHolster.Count == 0)
+      SetGameState(GameState.GameOver);
   }
+
+  void HandleVictory() => SetGameState(GameState.Victory);
 
   public void RestartGame() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 }

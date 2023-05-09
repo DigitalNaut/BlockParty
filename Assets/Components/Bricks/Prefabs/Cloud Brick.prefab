@@ -212,6 +212,10 @@ PrefabInstance:
       propertyPath: m_PropertySheet.m_AnimationCurve.m_Array.Array.data[0].m_Value.m_Curve.Array.data[0].outWeight
       value: 0.019619752
       objectReference: {fileID: 0}
+    - target: {fileID: 6166972964447665627, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
+      propertyPath: BreakEffect
+      value: 
+      objectReference: {fileID: 11400000, guid: e4a6de9602ccb294c81aab8aec1a379f, type: 2}
     - target: {fileID: 9218154161495362635, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: m_Name
       value: Cloud Brick

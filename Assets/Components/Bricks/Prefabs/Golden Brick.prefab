@@ -336,6 +336,10 @@ PrefabInstance:
       propertyPath: m_PropertySheet.m_AnimationCurve.m_Array.Array.data[0].m_Value.m_Curve.Array.data[0].outWeight
       value: 0.0247197
       objectReference: {fileID: 0}
+    - target: {fileID: 6166972964447665627, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
+      propertyPath: BreakEffect
+      value: 
+      objectReference: {fileID: 11400000, guid: e90f246cf356d5c47bca62e96957d4f7, type: 2}
     - target: {fileID: 9218154161495362635, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: m_Name
       value: Golden Brick
@@ -346,7 +350,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9218154161495362639, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2
+      value: -0.03000021
       objectReference: {fileID: 0}
     - target: {fileID: 9218154161495362639, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: m_LocalPosition.y

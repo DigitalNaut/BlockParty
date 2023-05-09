@@ -28,9 +28,9 @@ public class VFXEvent : ScriptableObject
     PlayEffect(position, differentScale);
   }
 
-  void PlayEffect(Vector3 position, Vector3? scale = null)
+  public void PlayEffect(Vector3 position, Vector3? scale = null)
   {
-    var VFX = Instantiate(VFXPrefab, null).AddComponent<Timer>();
+    var VFX = Instantiate(VFXPrefab, null);
 
     VFX.transform.parent = null;
     VFX.transform.position = position;
@@ -39,6 +39,6 @@ public class VFXEvent : ScriptableObject
     if (VFX.TryGetComponent(out VisualEffect effect))
       effect.SendEvent(VFXEventName);
 
-    VFX.Set(duration, Destroy);
+    Destroy(VFX, duration);
   }
 }

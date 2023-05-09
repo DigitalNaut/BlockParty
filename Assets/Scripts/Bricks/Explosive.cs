@@ -28,7 +28,7 @@ public class Explosive : MonoBehaviour
 
   void OnDisable() => breakable.OnBreak.RemoveListener(Explode);
 
-  void OnDestroy() => OnExplode.RemoveAllListeners();
+  void OnDestroy() => OnExplode?.RemoveAllListeners();
 
   Vector3[] GetAngles()
   {
@@ -47,17 +47,16 @@ public class Explosive : MonoBehaviour
 
   void Explode(Breakable breakable, Collision collision)
   {
-    var hits = new RaycastHit[16];
+    var hits = new RaycastHit[1];
 
     foreach (var direction in angles)
     {
       Physics.RaycastNonAlloc(transform.position, direction, hits, scale);
 
-      foreach (var hit in hits)
-      {
-        if (hit.collider && hit.collider.TryGetComponent(out Breakable other))
-          other.Break(null, Random.Range(0.1f, 0.25f));
-      }
+      var hit = hits[0];
+
+      if (hit.collider && hit.collider.TryGetComponent(out Breakable other))
+        other.BreakStrategy?.Invoke(null, Random.Range(0.1f, 0.25f));
     }
 
     OnExplode?.Invoke(this);

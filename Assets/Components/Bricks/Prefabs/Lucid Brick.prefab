@@ -11,14 +11,14 @@ PrefabInstance:
     - target: {fileID: -7215240182069164532, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: c3824f7f2dc8556449b07766d2974a48, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 536598501059661579, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: m_Material
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 1696410922460156130, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: Boost
-      value: 10
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1696410922460156130, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: Modifier
@@ -272,6 +272,10 @@ PrefabInstance:
       propertyPath: m_PropertySheet.m_AnimationCurve.m_Array.Array.data[0].m_Value.m_Curve.Array.data[1].outWeight
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6166972964447665627, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
+      propertyPath: BreakEffect
+      value: 
+      objectReference: {fileID: 11400000, guid: 133eb75438f4f2e40afe72c4308dc874, type: 2}
     - target: {fileID: 9218154161495362635, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: m_Name
       value: Lucid Brick
@@ -282,7 +286,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9218154161495362639, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 4
+      value: 1.9699998
       objectReference: {fileID: 0}
     - target: {fileID: 9218154161495362639, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -327,9 +331,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 9218154161495362635, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7791355698504540770}
-    - targetCorrespondingSourceObject: {fileID: 4058740883585159924, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2685873352281820135}
   m_SourcePrefab: {fileID: 100100000, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
 --- !u!1 &4410859548305466770 stripped
 GameObject:
@@ -348,49 +349,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 399c5bcc5387f6c49835981813735108, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lucidBallManager: {fileID: 0}
---- !u!1 &8829439463222000429 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4058740883585159924, guid: a34a89507be5a0a44ae03b27696275f2, type: 3}
-  m_PrefabInstance: {fileID: 4817711669895195097}
-  m_PrefabAsset: {fileID: 0}
---- !u!73398921 &2685873352281820135
-VFXRenderer:
-  serializedVersion: 1
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8829439463222000429}
-  m_Enabled: 1
-  m_CastShadows: 0
-  m_ReceiveShadows: 0
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 0
-  m_LightProbeUsage: 0
-  m_ReflectionProbeUsage: 0
-  m_RayTracingMode: 0
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0

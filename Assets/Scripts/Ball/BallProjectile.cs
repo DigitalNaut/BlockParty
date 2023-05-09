@@ -9,16 +9,16 @@ public class BallProjectile : MonoBehaviour
   [Header("Properties")]
   [SerializeField][MinMaxSlider(0.0f, 100.0f)] Vector2 speedLimits = new Vector2(1f, 20f);
 
-  new Rigidbody rigidbody;
+  public Rigidbody Rigidbody { get; private set; }
   AudioSource audioSource;
   Action speedModulator;
 
   public UnityEvent<BallProjectile> OnDestroyCallback;
 
-  float Speed
+  public float Speed
   {
-    get { return rigidbody.velocity.magnitude; }
-    set { rigidbody.velocity = rigidbody.velocity.normalized * Math.Clamp(value, speedLimits.x, speedLimits.y); }
+    get { return Rigidbody.velocity.magnitude; }
+    private set { Rigidbody.velocity = Rigidbody.velocity.normalized * Math.Clamp(value, speedLimits.x, speedLimits.y); }
   }
 
   public enum BoosterMode
@@ -28,11 +28,9 @@ public class BallProjectile : MonoBehaviour
     KeepFastest,
   }
 
-  public void SetKinematic(bool isKinematic) => rigidbody.isKinematic = isKinematic;
-
   void Awake()
   {
-    rigidbody = GetComponent<Rigidbody>();
+    Rigidbody = GetComponent<Rigidbody>();
     audioSource = GetComponent<AudioSource>();
 
     SetKinematic(false);
@@ -52,9 +50,25 @@ public class BallProjectile : MonoBehaviour
     OnDestroyCallback.RemoveAllListeners();
   }
 
+  public void SetKinematic(bool isKinematic) => Rigidbody.isKinematic = isKinematic;
+
+  public void ToggleFX(bool isActive)
+  {
+    foreach (var trail in GetComponentsInChildren<TrailRenderer>(isActive))
+    {
+      trail.Clear();
+      trail.gameObject.SetActive(isActive);
+    }
+    foreach (var particleSystem in GetComponentsInChildren<ParticleSystem>(isActive))
+    {
+      particleSystem.Clear();
+      particleSystem.gameObject.SetActive(isActive);
+    }
+  }
+
   public void DestroyProjectile()
   {
-    rigidbody.velocity = Vector3.zero;
+    Rigidbody.velocity = Vector3.zero;
     OnDestroyCallback?.Invoke(this);
 
     Destroy(gameObject);
@@ -62,9 +76,11 @@ public class BallProjectile : MonoBehaviour
 
   public void Launch(Vector3 launchVelocity, BoosterMode mode = BoosterMode.Absolute, float modifier = 1.0f)
   {
-    rigidbody.velocity = launchVelocity.normalized;
+    Rigidbody.velocity = launchVelocity.normalized;
     Modify(launchVelocity.magnitude, mode, modifier);
   }
+
+  public void Stop() => Rigidbody.velocity = Vector3.zero;
 
   public void Modify(float launchVelocity, BoosterMode mode = BoosterMode.Absolute, float modifier = 1.0f)
   {
@@ -78,5 +94,5 @@ public class BallProjectile : MonoBehaviour
     };
   }
 
-  internal void SetDirection(Vector3 newDirection) => rigidbody.velocity = newDirection.normalized * Speed;
+  internal void SetDirection(Vector3 newDirection) => Rigidbody.velocity = newDirection.normalized * Speed;
 }

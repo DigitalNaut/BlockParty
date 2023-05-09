@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   VFXPrefab: {fileID: 421253901391695571, guid: 5fcd7b97420ea904b92bc54b70bbb1ca, type: 3}
   VFXEventName: PlayRecall
+  delay: 0
+  duration: 0.5

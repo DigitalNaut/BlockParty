@@ -27,11 +27,11 @@ Transform:
   m_GameObject: {fileID: 6902277380210120281}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!2083052967 &9111790616530714156
 VisualEffect:
@@ -67,7 +67,33 @@ VisualEffect:
     m_Matrix4x4f:
       m_Array: []
     m_AnimationCurve:
-      m_Array: []
+      m_Array:
+      - m_Value:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.8
+            inSlope: 0.067671806
+            outSlope: 0.067671806
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0.14806078
+          - serializedVersion: 3
+            time: 1
+            value: 0.015533447
+            inSlope: -1.6818908
+            outSlope: -1.6818908
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.066492915
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        m_Name: Particle Size Over Lifetime
+        m_Overridden: 1
     m_Gradient:
       m_Array:
       - m_Value:

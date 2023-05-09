@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using NaughtyAttributes;
+using UnityEngine.Events;
 
 /// <summary>
 /// This class is responsible for spawning the lucid ball and playing the VFX animations.
@@ -19,29 +20,23 @@ public class LucidBallManager : MonoBehaviour
   [Required][SerializeField] AudioSource AudioSource;
 
   [Header("VFX")]
-  [Required][SerializeField][Expandable] VFXEvent implodeVFXPrefab;
-  [Required][SerializeField][Expandable] VFXEvent explodeVFXPrefab;
-  [Required][SerializeField][Expandable] VFXEvent foulBallVFXPrefab;
-  [Required][SerializeField][Expandable] VFXEvent victoryBurstVFXPrefab;
+  [Required][SerializeField][Expandable] VFXEvent implodeVFX;
+  [Required][SerializeField][Expandable] VFXEvent explodeVFX;
+  [Required][SerializeField][Expandable] VFXEvent foulBallVFX;
+  [Required][SerializeField][Expandable] VFXEvent victoryBurstVFX;
+  [Required][SerializeField][Expandable] VFXEvent recallVFX;
 
   [Header("SFX")]
   [Required][SerializeField] AudioClip BallUpgradeSound;
 
-  VFXEvent implodeVFX;
-  VFXEvent explodeVFX;
-  VFXEvent foulBallVFX;
-  VFXEvent victoryBurstVFX;
-  ItemsHolster<BallProjectile> ballsHolster;
+  [Foldout("Events")] public UnityEvent OnAllBallsDestroyed;
+
+  public ItemsHolster<BallProjectile> BallsHolster { get; private set; }
 
   void Awake()
   {
-    implodeVFX = Instantiate(implodeVFXPrefab);
-    explodeVFX = Instantiate(explodeVFXPrefab);
-    foulBallVFX = Instantiate(foulBallVFXPrefab);
-    victoryBurstVFX = Instantiate(victoryBurstVFXPrefab);
-
-    ballsHolster = new ItemsHolster<BallProjectile>();
-    ballsHolster.SetMaxLimit(5);
+    BallsHolster = new ItemsHolster<BallProjectile>();
+    BallsHolster.SetMaxLimit(5);
   }
 
   void OnDisable() => StopAllCoroutines();
@@ -58,14 +53,27 @@ public class LucidBallManager : MonoBehaviour
 
   public void BallDestroyedCallback(BallProjectile ball)
   {
-    ballsHolster.Remove(ball);
+    BallsHolster.Remove(ball);
     StartCoroutine(foulBallVFX.Play(ball.transform.position));
+
+    if (BallsHolster.Count == 0)
+      OnAllBallsDestroyed?.Invoke();
   }
 
   public void SpawnLucidBall(Transform spawner, Collision collision)
   {
-    var newLucidBall = ballsHolster.CanAddItems ? NewLucidBall(false) : ballsHolster.GetOldest(false);
-    ballsHolster.Add(newLucidBall);
+    BallProjectile newLucidBall;
+
+    if (BallsHolster.CanAddItems)
+      newLucidBall = NewLucidBall(false);
+    else
+    {
+      newLucidBall = BallsHolster.GetOldest(false);
+      StartCoroutine(recallVFX.Play(newLucidBall.transform.position));
+    }
+
+
+    BallsHolster.Add(newLucidBall);
 
     // Set the lucid ball's position and velocity
     newLucidBall.transform.position = spawner.position;
@@ -85,15 +93,15 @@ public class LucidBallManager : MonoBehaviour
 
   void DestroyBall(BallProjectile ball)
   {
-    ballsHolster.Remove(ball);
+    BallsHolster.Remove(ball);
     Destroy(ball.gameObject);
   }
 
-  void DestroyAllActiveBalls() => ballsHolster.Clear((ball) => ball.gameObject.activeSelf);
+  void DestroyAllActiveBalls() => BallsHolster.Clear((ball) => ball.gameObject.activeSelf);
 
   public void VictoryBurst()
   {
-    ballsHolster.ForEach(ball =>
+    BallsHolster.ForEach(ball =>
     {
       if (ball.gameObject.activeSelf)
         StartCoroutine(victoryBurstVFX.Play(ball.transform.position));

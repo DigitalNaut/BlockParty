@@ -26,21 +26,19 @@ public class BallManager : MonoBehaviour
 
   [Foldout("Events")] public UnityEvent<int> OnBallDispensed;
   [Foldout("Events")] public UnityEvent OnBallVolleyed;
-  [Foldout("Events")] public UnityEvent<int> OnBallDestroyed;
+  [Foldout("Events")] public UnityEvent OnBallDestroyed;
   [Foldout("Events")] public UnityEvent OnAllBallsDestroyed;
-  [Foldout("Events")] public UnityEvent OnBallQueueEmpty;
 
 #if UNITY_EDITOR
-  [ShowIf("IsNotPlaying")][ExecuteInEditMode][Button] void EmptyBallPrefabs() => BallPrefabs = new BallProjectile[0];
+  [ShowIf("IsNotPlaying")][Button] void EmptyBallPrefabs() => BallPrefabs = new BallProjectile[0];
   bool IsNotPlaying() => !EditorApplication.isPlaying;
 #endif
 
-  VFXEvent foulBallVFX;
-  VFXEvent victoryBurstVFX;
+  public Queue<BallProjectile> BallQueue { get; private set; }
+  public ItemsHolster<BallProjectile> ActiveBalls { get; private set; }
+
   BallProjectile ballOnPaddle;
   Coroutine dispenseRoutine;
-  Queue<BallProjectile> BallQueue = new Queue<BallProjectile>();
-  ItemsHolster<BallProjectile> activeBalls;
 
   Vector3 PositionOnPaddle => Paddle.position + Vector3.up * VolleyOffsetDistance;
 
@@ -48,10 +46,7 @@ public class BallManager : MonoBehaviour
   {
     Debug.Assert(BallPrefabs.Length > 0, "BallPrefabs is empty");
 
-    foulBallVFX = Instantiate(foulBallVFXPrefab);
-    victoryBurstVFX = Instantiate(victoryBurstVFXPrefab);
-
-    activeBalls = new ItemsHolster<BallProjectile>();
+    ActiveBalls = new ItemsHolster<BallProjectile>();
 
     InitBallQueue();
   }
@@ -62,13 +57,14 @@ public class BallManager : MonoBehaviour
     OnBallVolleyed.RemoveAllListeners();
     OnBallDestroyed.RemoveAllListeners();
     OnAllBallsDestroyed.RemoveAllListeners();
-    OnBallQueueEmpty.RemoveAllListeners();
 
     StopAllCoroutines();
   }
 
   void InitBallQueue()
   {
+    BallQueue ??= new Queue<BallProjectile>();
+
     foreach (var ball in BallPrefabs)
     {
       var ballInstance = Instantiate(ball);
@@ -80,22 +76,22 @@ public class BallManager : MonoBehaviour
   public void DestroyBall(BallProjectile ball)
   {
     ball.transform.gameObject.SetActive(false);
-    activeBalls.Remove(ball);
+    ActiveBalls.Remove(ball);
     Destroy(ball.gameObject);
 
-    StartCoroutine(foulBallVFX.Play(ball.transform.position));
+    StartCoroutine(foulBallVFXPrefab.Play(ball.transform.position));
 
-    OnBallDestroyed?.Invoke(activeBalls.Count);
+    OnBallDestroyed?.Invoke();
 
-    if (activeBalls.Count == 0)
+    if (ActiveBalls.Count == 0)
       OnAllBallsDestroyed?.Invoke();
   }
 
-  public void DestroyAllActiveBalls() => activeBalls.Clear();
+  public void DestroyAllActiveBalls() => ActiveBalls.Clear();
 
   public void VictoryBurst()
   {
-    activeBalls.ForEach(ball => StartCoroutine(victoryBurstVFX.Play(ball.transform.position)));
+    ActiveBalls.ForEach(ball => StartCoroutine(victoryBurstVFXPrefab.Play(ball.transform.position)));
 
     DestroyAllActiveBalls();
   }
@@ -119,7 +115,7 @@ public class BallManager : MonoBehaviour
     ball.Launch(vector);
 
     // Add it to the active balls list
-    activeBalls.Add(ball);
+    ActiveBalls.Add(ball);
 
     OnBallVolleyed?.Invoke();
   }
@@ -144,9 +140,6 @@ public class BallManager : MonoBehaviour
 
     dispenseRoutine = null;
 
-    if (BallQueue.Count == 0)
-      OnBallQueueEmpty?.Invoke();
-
     OnBallDispensed?.Invoke(BallQueue.Count);
   }
 
@@ -158,7 +151,7 @@ public class BallManager : MonoBehaviour
       return null;
     }
 
-    if (!activeBalls.CanAddItems)
+    if (!ActiveBalls.CanAddItems)
     {
       Debug.LogWarning("No more balls allowed.");
       return null;
@@ -177,26 +170,10 @@ public class BallManager : MonoBehaviour
     ball.transform.parent = Paddle;
     ball.transform.position = PositionOnPaddle;
     ball.SetKinematic(true);
-
-    ToggleFX(ball, false);
+    ball.ToggleFX(false);
 
     ballOnPaddle = ball;
   }
-
-  void ToggleFX(BallProjectile ball, bool isActive)
-  {
-    foreach (var trail in ball.GetComponentsInChildren<TrailRenderer>(isActive))
-    {
-      trail.Clear();
-      trail.gameObject.SetActive(isActive);
-    }
-    foreach (var particleSystem in ball.GetComponentsInChildren<ParticleSystem>(isActive))
-    {
-      particleSystem.Clear();
-      particleSystem.gameObject.SetActive(isActive);
-    }
-  }
-
   BallProjectile TakeBallOffPaddle()
   {
     if (ballOnPaddle == null)
@@ -206,8 +183,7 @@ public class BallManager : MonoBehaviour
     ballOnPaddle = null;
     ball.transform.parent = null;
     ball.SetKinematic(false);
-
-    ToggleFX(ball, true);
+    ball.ToggleFX(true);
 
     return ball;
   }

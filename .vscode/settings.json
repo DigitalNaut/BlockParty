@@ -54,6 +54,7 @@
         "Temp/":true
     },
     "cSpell.words": [
+        "Cooldown",
         "euler",
         "Frustrum",
         "launchable",
@@ -69,6 +70,7 @@
         "rigidbody",
         "Rigidbody",
         "Scriptable",
+        "teleporting",
         "Textbox",
         "UGUI"
     ]
