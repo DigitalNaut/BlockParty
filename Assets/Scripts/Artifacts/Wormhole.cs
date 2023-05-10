@@ -1,18 +1,18 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using NaughtyAttributes;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.VFX;
 
 [DisallowMultipleComponent]
-[RequireComponent(typeof(Collider))]
+[RequireComponent(typeof(Rigidbody))]
 public class Wormhole : MonoBehaviour
 {
   [Header("Settings")]
   [Tooltip("Delay between teleporting the ball in seconds")]
   [SerializeField] float TeleportDelay = 0.5f;
-  [Tooltip("Cooldown between teleporting the same ball in seconds")]
-  [SerializeField] float TeleportCooldown = 1f;
 
   [Header("Dependencies")]
   [Tooltip("The visual effect to play when teleporting the ball")]
@@ -21,29 +21,54 @@ public class Wormhole : MonoBehaviour
   [Required][SerializeField] Wormhole OtherWormhole;
   bool IsDifferentWormhole() => OtherWormhole != this;
 
-  [ReadOnly][SerializeField] bool canTeleport = true;
-
   Action<Collider> TeleportStrategy;
-  Coroutine teleportCooldownRoutine;
-  BallProjectile lastTeleportSubject;
+  BallProjectile lastInTeleportSubject; // Used to stop the teleport stream VFX when the last ball is teleported
+  List<BallProjectile> teleportSubjectsPendingExit = new List<BallProjectile>(); // Used to prevent teleporting the exiting ball back and forth between the two wormholes
 
+#if UNITY_EDITOR
   [Tooltip("Connects the two wormholes together")]
   [DisableIf("IsOtherWormholeNullOrThis")]
   [Button]
-  void ReciprocalWormhole()
+  void MakeReferenceWormholeReciprocal()
   {
-    if (OtherWormhole != null)
-      OtherWormhole.OtherWormhole = this;
+    if (OtherWormhole == null) throw new NullReferenceException("OtherWormhole is null");
+    OtherWormhole.OtherWormhole = this;
+    PrefabUtility.RecordPrefabInstancePropertyModifications(OtherWormhole);
   }
   bool IsOtherWormholeNullOrThis => OtherWormhole == null || OtherWormhole.OtherWormhole == this;
+#endif
 
   void Start() => SetTeleportStrategy();
 
+  void OnEnable() => SetTeleportStrategy();
+
+  void OnDisable() => SetTeleportStrategy();
+
   void OnTriggerEnter(Collider other) => TeleportStrategy?.Invoke(other);
 
-  void TransportSubject(BallProjectile subject) => subject.transform.position = OtherWormhole.transform.position;
+  void OnTriggerExit(Collider other)
+  {
+    if (other.TryGetComponent(out BallProjectile subject))
+      teleportSubjectsPendingExit.Remove(subject);
+  }
 
-  void SetTeleportStrategy() => TeleportStrategy = canTeleport ? Teleport : null;
+  void SetTeleportStrategy() => TeleportStrategy = enabled ? Teleport : null;
+
+  void Teleport(Collider other)
+  {
+    var canTeleportSubject = other.TryGetComponent(out BallProjectile subject)
+      && !teleportSubjectsPendingExit.Contains(subject)
+      && !subject.Rigidbody.isKinematic;
+
+    if (canTeleportSubject)
+    {
+      StartCoroutine(TeleportRoutine(subject));
+
+      lastInTeleportSubject = subject;
+      if (teleportVFX != null)
+        teleportVFX.SendEvent("PlayStream");
+    }
+  }
 
   IEnumerator TeleportRoutine(BallProjectile subject)
   {
@@ -56,7 +81,7 @@ public class Wormhole : MonoBehaviour
     subject.Rigidbody.position = transform.position;
 
     yield return new WaitForSeconds(TeleportDelay);
-    OtherWormhole.SetOnCooldown();
+    OtherWormhole.teleportSubjectsPendingExit.Add(subject);
 
     if (subject == null)
       yield break;
@@ -70,44 +95,15 @@ public class Wormhole : MonoBehaviour
     if (teleportVFX != null)
       OtherWormhole.teleportVFX.SendEvent("PlayBurst");
 
-    if (lastTeleportSubject == subject)
+    if (lastInTeleportSubject == subject)
     {
       if (teleportVFX != null)
         teleportVFX.SendEvent("StopStream");
-      lastTeleportSubject = null;
+      lastInTeleportSubject = null;
     }
   }
 
-  void Teleport(Collider other)
-  {
-    if (other.TryGetComponent(out BallProjectile subject) && subject.Rigidbody.isKinematic == false)
-    {
-      StartCoroutine(TeleportRoutine(subject));
-
-      lastTeleportSubject = subject;
-      if (teleportVFX != null)
-        teleportVFX.SendEvent("PlayStream");
-    }
-  }
-
-  IEnumerator TeleportCooldownRoutine()
-  {
-    yield return new WaitForSeconds(TeleportCooldown);
-
-    canTeleport = true;
-    SetTeleportStrategy();
-  }
-
-  public void SetOnCooldown()
-  {
-    if (teleportCooldownRoutine != null)
-      StopCoroutine(teleportCooldownRoutine);
-
-    canTeleport = false;
-    SetTeleportStrategy();
-
-    teleportCooldownRoutine = StartCoroutine(TeleportCooldownRoutine());
-  }
+  void TransportSubject(BallProjectile subject) => subject.transform.position = OtherWormhole.transform.position;
 
   void OnDrawGizmosSelected()
   {
