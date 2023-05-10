@@ -54,13 +54,16 @@ VisualEffect:
       - m_Value: 8
         m_Name: Drag
         m_Overridden: 1
-      - m_Value: 20
+      - m_Value: 8
         m_Name: Horizontal Burst Spread
         m_Overridden: 1
     m_Vector2f:
       m_Array:
-      - m_Value: {x: 5, y: 50}
+      - m_Value: {x: 5, y: 20}
         m_Name: Vertical Burst Speed
+        m_Overridden: 1
+      - m_Value: {x: 0.2, y: 0.7}
+        m_Name: Particle Start Size
         m_Overridden: 1
     m_Vector3f:
       m_Array: []
@@ -68,7 +71,7 @@ VisualEffect:
       m_Array: []
     m_Uint:
       m_Array:
-      - m_Value: 80
+      - m_Value: 120
         m_Name: BurstCount
         m_Overridden: 1
     m_Int:
@@ -82,21 +85,21 @@ VisualEffect:
           m_Curve:
           - serializedVersion: 3
             time: 0
-            value: 0.5023346
-            inSlope: -0.011538453
-            outSlope: -0.011538453
+            value: 0.8
+            inSlope: 0.067671806
+            outSlope: 0.067671806
             tangentMode: 0
             weightedMode: 0
             inWeight: 0
-            outWeight: 0.1896188
+            outWeight: 0.14806078
           - serializedVersion: 3
             time: 1
             value: 0.015533447
-            inSlope: -1.3868219
-            outSlope: -1.3868219
+            inSlope: -1.6818908
+            outSlope: -1.6818908
             tangentMode: 0
             weightedMode: 0
-            inWeight: 0.07896036
+            inWeight: 0.066492915
             outWeight: 0
           m_PreInfinity: 2
           m_PostInfinity: 2
@@ -107,9 +110,9 @@ VisualEffect:
       m_Array:
       - m_Value:
           serializedVersion: 2
-          key0: {r: 7.0611167, g: 0, b: 21.112127, a: 1}
-          key1: {r: 7.0683146, g: 7.0683146, b: 0, a: 0}
-          key2: {r: 0, g: 0, b: 0, a: 0}
+          key0: {r: 8.016494, g: 0, b: 23.968622, a: 1}
+          key1: {r: 1.4980391, g: 1.4980391, b: 1.4980391, a: 0}
+          key2: {r: 28.186356, g: 28.186356, b: 28.186356, a: 0}
           key3: {r: 0, g: 0, b: 0, a: 0}
           key4: {r: 0, g: 0, b: 0, a: 0}
           key5: {r: 0, g: 0, b: 0, a: 0}
@@ -117,13 +120,13 @@ VisualEffect:
           key7: {r: 0, g: 0, b: 0, a: 0}
           ctime0: 0
           ctime1: 65535
-          ctime2: 0
+          ctime2: 65535
           ctime3: 0
           ctime4: 0
           ctime5: 0
           ctime6: 0
           ctime7: 0
-          atime0: 0
+          atime0: 13685
           atime1: 65535
           atime2: 0
           atime3: 0
@@ -132,7 +135,7 @@ VisualEffect:
           atime6: 0
           atime7: 0
           m_Mode: 0
-          m_ColorSpace: -1
+          m_ColorSpace: 1
           m_NumColorKeys: 2
           m_NumAlphaKeys: 2
         m_Name: Particle Color
