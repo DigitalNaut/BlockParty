@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
-[Icon("Assets/Textures/Icons/Joystick.png")]
+[Icon("Assets/Textures/Script Icons/Joystick.png")]
 public class PlayerInput : MonoBehaviour
 {
   [Foldout("Events")] public UnityEvent onDispenseBall;

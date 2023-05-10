@@ -3,7 +3,7 @@ using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
 
-[Icon("Assets/Textures/Icons/ProjectileWithTrail.png")]
+[Icon("Assets/Textures/Script Icons/ProjectileWithTrail.png")]
 public class BallProjectile : MonoBehaviour
 {
   [Header("Properties")]

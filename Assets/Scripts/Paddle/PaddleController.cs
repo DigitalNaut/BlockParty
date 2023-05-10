@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
-[Icon("Assets/Textures/Icons/Joystick.png")]
+[Icon("Assets/Textures/Script Icons/Joystick.png")]
 [RequireComponent(typeof(Rigidbody))]
 public class PaddleController : MonoBehaviour
 {

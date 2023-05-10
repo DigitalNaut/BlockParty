@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-[Icon("Assets/Textures/Icons/Bounce.png")]
+[Icon("Assets/Textures/Script Icons/Bounce.png")]
 [RequireComponent(typeof(Renderer))]
 public class BouncePaddle : MonoBehaviour
 {

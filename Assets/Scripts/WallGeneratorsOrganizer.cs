@@ -11,7 +11,7 @@ public class WallGeneratorsOrganizer : MonoBehaviour
   [OnValueChanged("SetBrickWallGenerator")]
   [SerializeField] BrickWallGenerator currentBrickWallGenerator;
 
-  List<BrickWallGenerator> brickWallGenerators;
+  List<BrickWallGenerator> brickWallGenerators = new List<BrickWallGenerator>();
 
   void OnValidate()
   {
@@ -21,7 +21,7 @@ public class WallGeneratorsOrganizer : MonoBehaviour
     if (currentBrickWallGenerator == null)
       currentBrickWallGenerator = brickWallManager.GetBrickWallGenerator();
 
-    brickWallGenerators = new List<BrickWallGenerator>(GetComponentsInChildren<BrickWallGenerator>());
+    brickWallGenerators.AddRange(GetComponentsInChildren<BrickWallGenerator>());
   }
 
   void SetBrickWallGenerator()

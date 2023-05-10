@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.VFX;
 
-[Icon("Assets/Textures/Icons/FragileWarning.png")]
+[Icon("Assets/Textures/Script Icons/FragileWarning.png")]
 public class Breakable : MonoBehaviour
 {
   [Header("Dependencies")]

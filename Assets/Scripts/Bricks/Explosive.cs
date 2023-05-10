@@ -2,7 +2,7 @@ using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
 
-[Icon("Assets/Textures/Icons/Explosive.png")]
+[Icon("Assets/Textures/Script Icons/Explosive.png")]
 
 [RequireComponent(typeof(Breakable))]
 public class Explosive : MonoBehaviour
