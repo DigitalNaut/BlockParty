@@ -9,11 +9,15 @@ public class PerpetualRotator : MonoBehaviour
   [SerializeField][OnValueChanged("SetTurnStrategy")] bool isGlobal = true;
   [SerializeField] float TurnSpeed = 5f;
   [SerializeField] Vector3 TurnAxis = Vector3.forward;
-
+  [SerializeField] bool RandomAngleOnStart = true;
 
   Action TurnStrategy;
 
-  void Start() => SetTurnStrategy();
+  void Start()
+  {
+    if (RandomAngleOnStart) SetRandomAngle();
+    SetTurnStrategy();
+  }
 
   void OnEnable() => SetTurnStrategy();
   void OnDisable() => TurnStrategy = null;
@@ -27,4 +31,6 @@ public class PerpetualRotator : MonoBehaviour
   void TurnGlobally() => transform.rotation = GetRotation() * transform.rotation;
 
   void TurnLocally() => transform.localRotation = GetRotation() * transform.localRotation;
+
+  void SetRandomAngle() => transform.rotation = Quaternion.Euler(TurnAxis * UnityEngine.Random.Range(0f, 360f));
 }
