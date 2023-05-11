@@ -182,6 +182,7 @@ Material:
     - _BlendMode: 0
     - _BumpScale: 1
     - _CoatMask: 0
+    - _Contrast: 1.6
     - _Cull: 2
     - _CullMode: 2
     - _CullModeForward: 2
@@ -300,16 +301,17 @@ Material:
     - _ZTestTransparent: 4
     - _ZWrite: 1
     m_Colors:
-    - Color_ad8ecebbe91b4f1e80eb08fa0fe587b5: {r: 0.16019939, g: 0.4634035, b: 0.754717, a: 0}
-    - Color_c860cd129b4e4956a6b52ce820ab1907: {r: 0.15690638, g: 0.5838377, b: 0.7735849, a: 0}
+    - Color_ad8ecebbe91b4f1e80eb08fa0fe587b5: {r: 0.14509805, g: 0.3882353, b: 0.92156863, a: 0}
+    - Color_c860cd129b4e4956a6b52ce820ab1907: {r: 0.3764706, g: 0.64705884, b: 0.98039216, a: 0}
     - _BaseColor: {r: 0.12922749, g: 0.6157713, b: 0.8301887, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
-    - _Color: {r: 0.12922746, g: 0.6157713, b: 0.8301887, a: 1}
+    - _Color: {r: 0.14509805, g: 0.3882353, b: 0.92156863, a: 1}
     - _DiffusionProfileAsset: {r: 0, g: 0, b: 0, a: 0}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissiveColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissiveColorLDR: {r: 0, g: 0, b: 0, a: 1}
+    - _HIghlight: {r: 0.3764706, g: 0.64705884, b: 0.98039216, a: 0}
     - _InvPrimScale: {r: 1, g: 1, b: 0, a: 0}
     - _IridescenceThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
