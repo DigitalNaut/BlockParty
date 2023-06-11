@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Resources/UI%20Style%20Sheets/PlayerHud.uss?fileID=7433441132597879392&amp;guid=7fd45e419f322dc478d5428a6547a0a3&amp;type=3#PlayerHud" />
+    <ui:VisualElement name="Container" class="container">
+        <ui:VisualElement name="BricksCountLabel" class="label">
+            <ui:Label text="Bricks left:" />
+            <ui:Label tabindex="-1" text="#" display-tooltip-when-elided="true" name="BricksCount" />
+        </ui:VisualElement>
+        <ui:VisualElement name="BallsCountLabel" class="label" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
+            <ui:Label text="Balls left:" />
+            <ui:Label tabindex="-1" text="\uF00D" display-tooltip-when-elided="true" name="BallQueue" style="-unity-font-definition: resource(&apos;Fonts &amp; Materials/Font Awesome 6 Free-Solid-900 SDF&apos;);" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -3,17 +3,16 @@ using NaughtyAttributes;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(PlayerInput))]
 [RequireComponent(typeof(AudioSource))]
 public class GameManager : MonoBehaviour
 {
   [Header("UI")]
-  [Required][SerializeField] TextMeshProUGUI BallQueueText;
-  [Required][SerializeField] TextMeshProUGUI bricksCountTextbox;
-  [Required][SerializeField] CanvasGroup HUD;
-  [Required][SerializeField] CanvasGroup VictoryScreen;
-  [Required][SerializeField] CanvasGroup GameOverScreen;
+  [Required][SerializeField] UIDocument HUD;
+  [Required][SerializeField] UIDocument VictoryOverlay;
+  [Required][SerializeField] UIDocument GameOverOverlay;
 
   [Header("Dependencies")]
   [Required][SerializeField] BrickWallManager brickManager;
@@ -47,10 +46,7 @@ public class GameManager : MonoBehaviour
 
   void Start()
   {
-    brickManager.OnBricksCountChanged.AddListener(UpdateBricksCountTextbox);
     brickManager.OnAllBricksDestroyed.AddListener(HandleVictory);
-
-    ballManager.OnBallDispensed.AddListener(UpdateBallsQueueCountTextbox);
     ballManager.OnBallDestroyed.AddListener(HandleBallDestroyed);
 
     lucidBallManager.OnAllBallsDestroyed.AddListener(HandleBallDestroyed);
@@ -72,8 +68,8 @@ public class GameManager : MonoBehaviour
         ballManager.DispenseNextBall();
 
         HUD.gameObject.SetActive(true);
-        VictoryScreen.gameObject.SetActive(false);
-        GameOverScreen.gameObject.SetActive(false);
+        VictoryOverlay.gameObject.SetActive(false);
+        GameOverOverlay.gameObject.SetActive(false);
         break;
       case GameState.Victory:
         ToggleControls(false);
@@ -81,15 +77,15 @@ public class GameManager : MonoBehaviour
         ballManager.VictoryBurst();
         lucidBallManager.VictoryBurst();
 
-        VictoryScreen.gameObject.SetActive(true);
-        GameOverScreen.gameObject.SetActive(false);
+        VictoryOverlay.gameObject.SetActive(true);
+        GameOverOverlay.gameObject.SetActive(false);
         HUD.gameObject.SetActive(false);
         break;
       case GameState.GameOver:
         ToggleControls(false);
 
         HUD.gameObject.SetActive(false);
-        GameOverScreen.gameObject.SetActive(true);
+        GameOverOverlay.gameObject.SetActive(true);
         break;
       default:
         throw new System.Exception($"Unknown game state: {state}");
@@ -103,10 +99,6 @@ public class GameManager : MonoBehaviour
     playerInput.enabled = enable;
     Paddle.enabled = enable;
   }
-
-  void UpdateBricksCountTextbox(int count) => bricksCountTextbox.text = count.ToString();
-
-  void UpdateBallsQueueCountTextbox(int count) => BallQueueText.text = count > 0 ? string.Concat(Enumerable.Repeat("\uF111 ", count)) : "\uF00D";
 
   void RegisterLucidBallSpawner(Breakable brick)
   {

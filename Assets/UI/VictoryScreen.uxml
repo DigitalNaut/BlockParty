@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Resources/UI%20Style%20Sheets/Overlay.uss?fileID=7433441132597879392&amp;guid=729b5e97143ff5c47b34e33a62727784&amp;type=3#Overlay" />
+    <ui:VisualElement name="Container" class="container">
+        <ui:Label text="&lt;color=&quot;white&quot;&gt;&lt;gradient=&quot;Green to Dark Green - Vertical&quot;&gt;Victory!&lt;/gradient&gt;&lt;/color&gt;" name="Title" class="title" style="color: rgb(17, 176, 0);" />
+        <ui:VisualElement name="Buttons" class="buttons" style="background-color: rgba(0, 0, 0, 0);">
+            <ui:Button name="ContinueButton" class="button">
+                <ui:Label tabindex="-1" text="Continue" display-tooltip-when-elided="true" name="Label" />
+                <ui:Label tabindex="-1" text="\uF04B" display-tooltip-when-elided="true" name="Icon" style="-unity-font-definition: resource(&apos;Fonts &amp; Materials/Font Awesome 6 Free-Solid-900 SDF&apos;);" />
+            </ui:Button>
+            <ui:Button name="QuitButton" class="button">
+                <ui:Label tabindex="-1" text="Exit Game" display-tooltip-when-elided="true" name="Label" />
+                <ui:Label tabindex="-1" text="\uF52B" display-tooltip-when-elided="true" name="Icon" style="-unity-font-definition: resource(&apos;Fonts &amp; Materials/Font Awesome 6 Free-Solid-900 SDF&apos;);" />
+            </ui:Button>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,8 +1,8 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Resources/UI%20Style%20Sheets/MainMenu.uss?fileID=7433441132597879392&amp;guid=93acbe42a182ea64e9be4c7a41504c34&amp;type=3#MainMenu" />
-    <ui:VisualElement name="Background" class="background" style="align-self: auto; align-items: center; background-color: rgb(88, 28, 135);">
+    <ui:VisualElement name="Background" class="background">
         <ui:VisualElement name="Header" class="header">
-            <ui:TextElement tabindex="-1" text="&lt;color=white&quot;&gt;&lt;gradient=&quot;Dark Blue to Pink - Vertical&quot;&gt;Block Party&lt;/gradient&gt;&lt;/color&gt;" display-tooltip-when-elided="true" name="Title" enable-rich-text="true" class="title" />
+            <ui:TextElement tabindex="-1" text="&lt;color=&quot;white&quot;&gt;&lt;gradient=&quot;Dark Blue to Pink - Vertical&quot;&gt;Block Party&lt;/gradient&gt;&lt;/color&gt;" display-tooltip-when-elided="true" name="Title" enable-rich-text="true" class="title" />
         </ui:VisualElement>
         <ui:VisualElement name="MenuButtons" class="buttons">
             <ui:Button display-tooltip-when-elided="true" name="NewGameButton" class="button">
