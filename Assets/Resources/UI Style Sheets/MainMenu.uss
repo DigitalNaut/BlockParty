@@ -5,6 +5,33 @@
     height: 100%;
 }
 
+.header {
+    flex-grow: 1;
+    justify-content: center;
+    width: 100%;
+}
+
+.header #Title {
+    color: rgb(236, 72, 153);
+    align-items: center;
+    justify-content: center;
+    -unity-text-align: upper-center;
+    -unity-font-style: normal;
+    -unity-font-definition: resource('Fonts & Materials/Slackey-Regular SDF');
+    -unity-text-outline-color: rgb(255, 255, 255);
+    -unity-text-outline-width: 3px;
+    font-size: 72px;
+    white-space: nowrap;
+}
+
+.buttons {
+    flex-grow: 1;
+    width: 30%;
+    justify-content: flex-start;
+    flex-shrink: 0;
+    min-width: 300px;
+}
+
 .button {
     background-color: rgb(20, 184, 166);
     border-left-color: rgb(255, 255, 255);
@@ -20,7 +47,53 @@
     border-top-width: 2px;
     border-bottom-width: 2px;
     color: rgb(255, 255, 255);
+    -unity-font-style: normal;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-left: 64px;
+    padding-right: 64px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.button:hover {
+    background-color: rgb(255, 255, 255);
+    border-left-color: rgb(255, 255, 255);
+    border-right-color: rgb(255, 255, 255);
+    border-top-color: rgb(255, 255, 255);
+    border-bottom-color: rgb(255, 255, 255);
+    border-top-left-radius: 24px;
+    border-bottom-left-radius: 24px;
+    border-top-right-radius: 24px;
+    border-bottom-right-radius: 24px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    color: rgb(20, 184, 166);
     -unity-font-style: bold;
     flex-direction: row;
-    justify-content: center;
+    justify-content: space-between;
+    padding-left: 64px;
+    padding-right: 64px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.button #Label {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    -unity-font-definition: resource('Fonts & Materials/Slackey-Regular SDF');
+    -unity-font-style: normal;
+}
+
+.button #Icon {
+    -unity-font-definition: resource('Fonts & Materials/Font Awesome 6 Free-Solid-900 SDF');
+    font-size: 20px;
 }

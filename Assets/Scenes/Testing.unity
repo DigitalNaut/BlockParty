@@ -5353,8 +5353,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: \uf111 \uf111 \uf111
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 7fdb87fc14e940740a44063b817660f4, type: 2}
-  m_sharedMaterial: {fileID: 44981978135052535, guid: 7fdb87fc14e940740a44063b817660f4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2c0ebc0ae44d55544b480e2217340f4e, type: 2}
+  m_sharedMaterial: {fileID: 9097761377038974620, guid: 2c0ebc0ae44d55544b480e2217340f4e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
