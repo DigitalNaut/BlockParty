@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[Icon("Assets/Textures/Script Icons/ProjectileCrossedOut.png")]
+[Icon("Assets/Icons/Scripts/ProjectileCrossedOut.png")]
 public class BallDestroyer : MonoBehaviour
 {
   private void OnCollisionEnter(Collision collision)

@@ -3,6 +3,7 @@ using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+[Icon("Assets/Icons/Scripts/UI/Overlay.png")]
 public class PlayerHUD : MonoBehaviour
 {
   VisualElement root;

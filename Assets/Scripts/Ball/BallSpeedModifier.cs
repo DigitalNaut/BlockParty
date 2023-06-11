@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-[Icon("Assets/Textures/Script Icons/Spedometer.png")]
+[Icon("Assets/Icons/Scripts/Spedometer.png")]
 public class BallSpeedModifier : MonoBehaviour
 {
   [Header("Settings")]

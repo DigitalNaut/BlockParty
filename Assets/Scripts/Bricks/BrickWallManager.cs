@@ -4,7 +4,7 @@ using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
 
-[Icon("Assets/Textures/Script Icons/BrickWallCogs.png")]
+[Icon("Assets/Icons/Scripts/BrickWallCogs.png")]
 public class BrickWallManager : MonoBehaviour
 {
   [Header("Dependencies")]

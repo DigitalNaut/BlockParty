@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.VFX;
 
+[Icon("Assets/Icons/Scripts/Wormhole.png")]
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Rigidbody))]
 public class Wormhole : MonoBehaviour

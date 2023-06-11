@@ -5,6 +5,7 @@ using NaughtyAttributes;
 using UnityEditor;
 using System.Linq;
 
+[Icon("Assets/Icons/Scripts/UI/Menu.png")]
 public class MainMenu : MonoBehaviour
 {
   VisualElement root;

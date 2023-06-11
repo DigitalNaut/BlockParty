@@ -2,6 +2,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using UnityEngine;
 
+[Icon("Assets/Icons/Scripts/UI/Overlay.png")]
 public class VictoryOverlay : MonoBehaviour
 {
   VisualElement root;

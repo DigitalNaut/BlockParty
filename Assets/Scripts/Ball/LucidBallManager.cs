@@ -8,7 +8,7 @@ using UnityEngine.Events;
 /// </summary>
 
 // Set script icon
-[Icon("Assets/Textures/Script Icons/PurpleBallCog.png")]
+[Icon("Assets/Icons/Scripts/PurpleBallCog.png")]
 [AddComponentMenu("Scripts/Ball/LucidBallManager")]
 [RequireComponent(typeof(BallManager))]
 public class LucidBallManager : MonoBehaviour

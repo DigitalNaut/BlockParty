@@ -2,7 +2,7 @@
 using NaughtyAttributes;
 using UnityEngine;
 
-[Icon("Assets/Textures/Script Icons/TrowelBrickWall.png")]
+[Icon("Assets/Icons/Scripts/TrowelBrickWall.png")]
 public class BrickWallGenerator : MonoBehaviour
 {
   [Header("Prefabs")]

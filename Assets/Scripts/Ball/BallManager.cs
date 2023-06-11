@@ -6,7 +6,7 @@ using UnityEngine.Events;
 using NaughtyAttributes;
 using UnityEditor;
 
-[Icon("Assets/Textures/Script Icons/YellowBallCog.png")]
+[Icon("Assets/Icons/Scripts/YellowBallCog.png")]
 public class BallManager : MonoBehaviour
 {
   [Header("Settings")]
