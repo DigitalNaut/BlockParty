@@ -7,6 +7,8 @@ public class ScaleToFrustrum : MonoBehaviour
 
   void ScaleObject()
   {
+    if(!enabled) return;
+
     float distance = Camera.main.farClipPlane - 0.01f;
     transform.position = Camera.main.transform.position + Camera.main.transform.forward * distance;
     transform.LookAt(Camera.main.transform);

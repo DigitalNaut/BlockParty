@@ -99,12 +99,7 @@ public class BallManager : MonoBehaviour
   public void VolleyBallOnPaddle(Vector3 vector)
   {
     var ball = TakeBallOffPaddle();
-
-    if (ball == null)
-    {
-      Debug.LogWarning("No ball on paddle.");
-      return;
-    }
+    if (ball == null) return;
 
     // Set ball properties
     ball.GetComponent<Rigidbody>().useGravity = true;
