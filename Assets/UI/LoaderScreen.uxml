@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Resources/USS/Overlay.uss?fileID=7433441132597879392&amp;guid=729b5e97143ff5c47b34e33a62727784&amp;type=3#Overlay" />
+    <ui:VisualElement name="Container" class="container" style="background-color: rgb(34, 10, 0);">
+        <ui:Label text="&lt;color=&quot;white&quot;&gt;&lt;gradient=&quot;Yellow to Dark Yellow - Vertical&quot;&gt;Loading...&lt;/gradient&gt;&lt;/color&gt;" name="Title" class="title" style="color: rgb(176, 20, 0);" />
+        <ui:ProgressBar value="50" name="ProgressBar" style="width: 60%;" />
+    </ui:VisualElement>
+</ui:UXML>

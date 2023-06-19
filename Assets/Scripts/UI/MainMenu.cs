@@ -26,7 +26,7 @@ public class MainMenu : MonoBehaviour
             .ToArray();
 #endif
 
-  void OnPlayButtonClicked() => SceneManager.LoadScene(gameSceneName);
+  void OnPlayButtonClicked() => LevelManager.LoadLevel(gameSceneName);
 
   void OnLoadGameButtonClicked()
   {

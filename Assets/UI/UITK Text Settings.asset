@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Version: 
   m_DefaultFontAsset: {fileID: 11400000, guid: 8230b8d182cbafe4fb7434bd8d240753, type: 2}
-  m_DefaultFontAssetPath: Fonts & Materials/
+  m_DefaultFontAssetPath: Fonts/
   m_FallbackFontAssets: []
   m_MatchMaterialPreset: 0
   m_MissingCharacterUnicode: 0
@@ -24,8 +24,8 @@ MonoBehaviour:
   m_FallbackSpriteAssets: []
   m_MissingSpriteCharacterUnicode: 0
   m_DefaultStyleSheet: {fileID: 0}
-  m_StyleSheetsResourcePath: Text Style Sheets/
-  m_DefaultColorGradientPresetsPath: Text Color Gradients/
+  m_StyleSheetsResourcePath: USS/
+  m_DefaultColorGradientPresetsPath: Gradients/
   m_UnicodeLineBreakingRules:
     m_UnicodeLineBreakingRules: {fileID: 0}
     m_LeadingCharacters: {fileID: 0}

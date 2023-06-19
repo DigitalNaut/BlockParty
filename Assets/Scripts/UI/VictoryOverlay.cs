@@ -7,19 +7,18 @@ public class VictoryOverlay : MonoBehaviour
 {
   VisualElement root;
   Button continueButton;
+  Button mainMenuButton;
   Button exitGameButton;
-
-  void Continue() => SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-
-  void ExitGame() => Application.Quit();
 
   void Awake()
   {
     root = GetComponent<UIDocument>().rootVisualElement;
     continueButton = root.Q<Button>("ContinueButton");
+    mainMenuButton = root.Q<Button>("MainMenuButton");
     exitGameButton = root.Q<Button>("QuitButton");
 
-    continueButton.clicked += Continue;
-    exitGameButton.clicked += ExitGame;
+    continueButton.clicked += LevelManager.LoadNextLevel;
+    mainMenuButton.clicked += LevelManager.LoadMainMenu;
+    exitGameButton.clicked += Application.Quit;
   }
 }

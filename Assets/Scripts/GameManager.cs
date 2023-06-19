@@ -1,6 +1,4 @@
-using System.Linq;
 using NaughtyAttributes;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -15,7 +13,8 @@ public class GameManager : MonoBehaviour
   [Required][SerializeField] UIDocument GameOverOverlay;
 
   [Header("Dependencies")]
-  [Required][SerializeField] BrickWallManager brickManager;
+  [InfoBox("The BrickWallManager will be loaded automatically at runtime")]
+  [ReadOnly][SerializeField] BrickWallManager brickManager;
   [Required][SerializeField] BallManager ballManager;
   [Required][SerializeField] LucidBallManager lucidBallManager;
   [Required][SerializeField] PaddleController Paddle;
@@ -26,10 +25,18 @@ public class GameManager : MonoBehaviour
   enum GameState { Playing, Victory, GameOver }
   GameState? gameState = null;
 
+  void OnValidate()
+  {
+    if (brickManager == null) brickManager = FindObjectOfType<BrickWallManager>();
+    if (ballManager == null) ballManager = FindObjectOfType<BallManager>();
+  }
+
   void Awake()
   {
     audioSource = GetComponent<AudioSource>();
     playerInput = GetComponent<PlayerInput>();
+
+    brickManager = FindObjectOfType<BrickWallManager>();
   }
 
   void OnEnable()
@@ -120,5 +127,5 @@ public class GameManager : MonoBehaviour
 
   void HandleVictory() => SetGameState(GameState.Victory);
 
-  public void RestartGame() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+  public void RestartGame() => LevelManager.LoadLevel(SceneManager.GetActiveScene().name);
 }
