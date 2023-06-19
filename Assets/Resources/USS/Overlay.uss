@@ -1,6 +1,6 @@
 .container {
     flex-grow: 1;
-    background-color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.47);
     position: absolute;
     left: 0;
     top: 0;
@@ -73,4 +73,23 @@
 
 .buttons > Button #Icon {
     -unity-font-definition: resource('Fonts/Font Awesome 6 Free-Solid-900 SDF');
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.buttons > Button #Label {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
 }
